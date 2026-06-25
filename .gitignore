@@ -1,0 +1,60 @@
+# Node / NPM Dependencies
+node_modules/
+
+# Production Build Directories (Vite, TS, Next, etc.)
+dist/
+build/
+.next/
+out/
+
+# Environment Variables & Private Configurations
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+.env.example # Thường được commit, nhưng chúng ta giữ ở đây nếu muốn bỏ qua bản local riêng lẻ
+
+# IDE / Trình soạn thảo văn bản
+.vscode/
+.idea/
+.cursor/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.history/
+
+# Nhật ký (Logs) và chẩn đoán
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+logs/
+*.sys.log
+
+# Hệ điều hành (OS Caches)
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Cơ sở dữ liệu cục bộ / Tệp tạm thời
+*.sqlite
+*.sqlite-journal
+dev.db
+dev.db-journal
+
+# File rác đặc thù của Antigravity CLI / AI
+.gemini/
+screenshot*.png
+temp/
+tmp/
+proposal_quan_ly_nha_tro.md
+.cursorrules
+README-local.md
+docs/

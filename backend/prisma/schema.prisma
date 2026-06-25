@@ -1,0 +1,114 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum RoomStatus {
+  VACANT
+  OCCUPIED
+  MAINTENANCE
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BoardingHouse {
+  id        String   @id @default(uuid())
+  name      String   @unique // Ví dụ: "Hẻm 9 Đơ", "3 Trời", "Dãy Kiot"
+  rooms     Room[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Room {
+  id                   String        @id @default(uuid())
+  name                 String        @unique // Ví dụ: "A1", "B2", "Kiot 1"
+  status               RoomStatus    @default(VACANT)
+  boardingHouseId      String
+  boardingHouse        BoardingHouse @relation(fields: [boardingHouseId], references: [id], onDelete: Cascade)
+  
+  // Cấu hình giá phòng & dịch vụ cố định
+  price                Decimal       // Tiền thuê phòng cơ bản
+  electricityPrice     Decimal       @default(3500) // Đơn giá điện (đ/kWh)
+  waterPrice           Decimal       @default(15000) // Đơn giá nước (đ/m3)
+  internetPrice        Decimal       @default(100000) // Phí internet cố định/tháng
+  trashPrice           Decimal       @default(20000) // Phí rác thải cố định/tháng
+
+  // Thông tin khách thuê hiện tại
+  renterName           String?
+  renterPhone          String?
+  renterDeposit        Decimal?      @default(0) // Tiền đặt cọc phòng
+  electricityDeposit   Decimal       @default(0)   // Tiền cọc điện gối đầu (dành cho hẻm 9 Đơ)
+  isElectricityIncluded Boolean      @default(false) // Note bao điện (dành cho 3 Trời)
+  rentStartDate        DateTime?
+  rentStartElectricity Float         @default(0)   // Chỉ số điện ban đầu lúc khách mới vào ở
+  rentStartWater       Float         @default(0)   // Chỉ số nước ban đầu lúc khách mới vào ở
+
+  // Quan hệ
+  bills            Bill[]
+  expenses         Expense[]
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+}
+
+model Bill {
+  id                 String    @id @default(uuid())
+  roomId             String
+  room               Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  
+  month              Int       // Tháng xuất hóa đơn (1-12)
+  year               Int       // Năm xuất hóa đơn
+  
+  // Chỉ số điện nước
+  oldElectricity     Float     // Số điện cũ
+  newElectricity     Float     // Số điện mới
+  oldWater           Float     // Số nước cũ
+  newWater           Float     // Số nước mới
+
+  // Các khoản tính tiền
+  rentAmount         Decimal   // Tiền phòng thực tế thu (thường bằng Room.price)
+  electricityAmount  Decimal   // Tiền điện tính được: (mới - cũ) * Room.electricityPrice
+  waterAmount        Decimal   // Tiền nước tính được: (mới - cũ) * Room.waterPrice
+  internetAmount     Decimal   // Tiền internet (thường bằng Room.internetPrice)
+  trashAmount        Decimal   // Tiền rác (thường bằng Room.trashPrice)
+  
+  // Chi phí phát sinh riêng của phòng tháng đó (sửa thiết bị, đền bù đồ hỏng,...)
+  extraAmount        Decimal   @default(0)
+  extraDescription   String?   // Mô tả chi phí phát sinh
+
+  // Tổng cộng
+  totalAmount        Decimal   // Tổng tiền = cộng tất cả các khoản trên
+  isPaid             Boolean   @default(false)
+  paidAt             DateTime?
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@unique([roomId, month, year]) // Một phòng chỉ có tối đa 1 hóa đơn mỗi tháng/năm
+}
+
+model Expense {
+  id          String   @id @default(uuid())
+  title       String   // Tiêu đề: "Sửa máy bơm", "Mua vòi xịt toilet mới"...
+  amount      Decimal  // Số tiền chi
+  description String?  // Chi tiết thêm
+  date        DateTime @default(now())
+  
+  // Liên kết phòng (nếu chi phí sửa riêng cho phòng đó, ví dụ sửa quạt phòng A1)
+  roomId      String?
+  room        Room?    @relation(fields: [roomId], references: [id], onDelete: SetNull)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
