@@ -20,18 +20,7 @@ export const validate = (schema: any) => {
       
       next(); // Cho phép request đi tiếp vào Controller
     } catch (error) {
-      if (error instanceof ZodError) {
-        // Trả về danh sách lỗi cụ thể định dạng JSON đẹp mắt
-        res.status(400).json({
-          message: 'Dữ liệu đầu vào không hợp lệ!',
-          errors: error.issues.map((err: any) => ({
-            field: err.path.join('.'),
-            message: err.message,
-          })),
-        });
-        return;
-      }
-      res.status(500).json({ error: 'Internal Server Error' });
+      next(error);
     }
   };
 };

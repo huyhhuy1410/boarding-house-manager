@@ -12,6 +12,17 @@ import {
 } from "lucide-react";
 import { roomService, Room, BoardingHouse } from "./services/room.service";
 import { billService, Bill } from "./services/bill.service";
+import { expenseService, Expense, FinancialSummary } from "./services/expense.service";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<
@@ -25,23 +36,9 @@ export default function App() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Dữ liệu giả lập chi phí phát sinh (Expenses) để hiển thị Dashboard & Danh sách
-  const expenses = [
-    {
-      id: 1,
-      title: "Sửa vòi hoa sen",
-      room: "Phòng A1",
-      amount: 150000,
-      date: "2026-06-15",
-    },
-    {
-      id: 2,
-      title: "Thay bóng đèn hành lang",
-      room: "Chung",
-      amount: 50000,
-      date: "2026-06-12",
-    },
-  ];
+  // Dữ liệu chi phí phát sinh (Expenses) và biểu đồ tổng kết (chartData) từ API
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [chartData, setChartData] = useState<FinancialSummary[]>([]);
 
   const [bills, setBills] = useState<Bill[]>([]);
   const [selectedMonth] = useState<number>(6);
@@ -59,6 +56,13 @@ export default function App() {
       }
     >
   >({});
+
+  // Trạng thái nhập liệu cho Form Thêm Chi Phí Mới
+  const [showExpenseForm, setShowExpenseForm] = useState<boolean>(false);
+  const [expenseTitle, setExpenseTitle] = useState<string>("");
+  const [expenseAmount, setExpenseAmount] = useState<string>("");
+  const [expenseRoomId, setExpenseRoomId] = useState<string>("chung");
+  const [expenseDesc, setExpenseDesc] = useState<string>("");
 
   const fetchRoomsAndBills = async () => {
     try {
@@ -89,6 +93,12 @@ export default function App() {
         };
       });
       setRooms(mappedRooms);
+
+      const expensesData = await expenseService.getAll();
+      setExpenses(expensesData);
+
+      const summaryData = await expenseService.getSummary();
+      setChartData(summaryData);
 
       setError(null);
     } catch (err: any) {
@@ -186,6 +196,46 @@ export default function App() {
     }
   };
 
+  const handleCreateExpense = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (!expenseTitle.trim() || !expenseAmount.trim()) {
+        alert("Vui lòng nhập đầy đủ tên chi phí và số tiền!");
+        return;
+      }
+      setLoading(true);
+      await expenseService.create({
+        title: expenseTitle,
+        amount: Number(expenseAmount),
+        description: expenseDesc || null,
+        roomId: expenseRoomId === "chung" ? null : expenseRoomId,
+      });
+      setExpenseTitle("");
+      setExpenseAmount("");
+      setExpenseDesc("");
+      setExpenseRoomId("chung");
+      setShowExpenseForm(false);
+      await fetchRoomsAndBills(); // Load lại data bao gồm cả doanh thu & biểu đồ mới
+    } catch (err: any) {
+      alert("Lỗi: " + (err.response?.data?.error || err.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteExpense = async (id: string) => {
+    if (!confirm("Bạn có chắc chắn muốn xóa chi phí này?")) return;
+    try {
+      setLoading(true);
+      await expenseService.delete(id);
+      await fetchRoomsAndBills();
+    } catch (err: any) {
+      alert("Lỗi khi xóa: " + (err.response?.data?.error || err.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Sao chép tin nhắn mẫu biên lai gửi qua Zalo/iMessage
   const handleCopyZalo = (
     bill: Bill,
@@ -254,6 +304,13 @@ export default function App() {
       style: "currency",
       currency: "VND",
     }).format(value);
+  };
+
+  // Định dạng rút gọn cho cột Y của biểu đồ Recharts (Ví dụ: 15.000.000 -> 15Tr)
+  const formatYAxis = (value: number) => {
+    if (value >= 1000000) return `${(value / 1000000).toFixed(0)}Tr`;
+    if (value >= 1000) return `${(value / 1000).toFixed(0)}k`;
+    return value.toString();
   };
   if (loading) {
     return (
@@ -356,6 +413,22 @@ export default function App() {
                 </span>
               </div>
             </div>
+          </section>
+
+          <section style={{ backgroundColor: "var(--surface-color)", padding: "16px", borderRadius: "16px", border: "1px solid var(--border-color)", height: "280px", marginBottom: "16px" }}>
+            <h4 style={{ fontSize: "0.9rem", color: "var(--text-secondary)", marginBottom: "12px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Thống kê 6 tháng gần nhất</h4>
+            <ResponsiveContainer width="100%" height="90%">
+              <BarChart data={chartData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                <XAxis dataKey="month" stroke="var(--text-muted)" fontSize={10} />
+                <YAxis stroke="var(--text-muted)" fontSize={10} tickFormatter={formatYAxis} width={40} />
+                <Tooltip contentStyle={{ backgroundColor: "var(--surface-color)", borderColor: "var(--border-color)", color: "var(--text-primary)" }} />
+                <Legend wrapperStyle={{ fontSize: "0.8rem" }} />
+                <Bar dataKey="income" name="Thu nhập" fill="var(--primary-color)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="expense" name="Chi phí" fill="var(--warning)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="profit" name="Lợi nhuận" fill="var(--success)" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </section>
 
           {/* Quick Info Grid */}
@@ -473,7 +546,7 @@ export default function App() {
                   <div
                     style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}
                   >
-                    Phạm vi: {exp.room} • {exp.date}
+                    Phạm vi: {exp.room?.name || "Chung"} • {exp.date}
                   </div>
                 </div>
                 <div style={{ fontWeight: "600", color: "var(--warning)" }}>
@@ -1235,64 +1308,77 @@ export default function App() {
                 borderRadius: "10px",
                 fontSize: "0.8rem",
               }}
+              onClick={() => setShowExpenseForm(true)}
             >
               <Plus size={16} /> Thêm chi phí
             </button>
           </div>
 
+          {showExpenseForm && (
+            <form onSubmit={handleCreateExpense} style={{
+              backgroundColor: "var(--surface-color)",
+              padding: "16px",
+              borderRadius: "16px",
+              border: "1px solid var(--border-color)",
+              display: "flex",
+              flexDirection: "column",
+              gap: "12px",
+              marginTop: "8px"
+            }}>
+              <h4 style={{ fontWeight: "bold", fontSize: "1rem" }}>Thêm Chi Phí Mới</h4>
+              <div>
+                <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Tên chi phí / Lý do</label>
+                <input type="text" placeholder="Ví dụ: Thay vòi nước" value={expenseTitle} onChange={(e) => setExpenseTitle(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.9rem" }} />
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                <div>
+                  <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Số tiền (đ)</label>
+                  <input type="number" placeholder="Ví dụ: 150000" value={expenseAmount} onChange={(e) => setExpenseAmount(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.9rem" }} />
+                </div>
+                <div>
+                  <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Áp dụng cho</label>
+                  <select value={expenseRoomId} onChange={(e) => setExpenseRoomId(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.9rem" }}>
+                    <option value="chung">Chung cả nhà</option>
+                    {rooms.map((r) => (
+                      <option key={r.id} value={r.id}>{r.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Ghi chú thêm</label>
+                <input type="text" placeholder="Ghi chú chi tiết (nếu có)" value={expenseDesc} onChange={(e) => setExpenseDesc(e.target.value)} style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.9rem" }} />
+              </div>
+              <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
+                <button type="submit" className="btn-primary" style={{ flex: 1, padding: "10px", fontSize: "0.85rem" }}>Lưu lại</button>
+                <button type="button" className="btn-secondary" onClick={() => setShowExpenseForm(false)} style={{ flex: 1, padding: "10px", fontSize: "0.85rem", backgroundColor: "transparent", color: "var(--text-secondary)", border: "1px solid var(--border-color)", borderRadius: "8px" }}>Hủy</button>
+              </div>
+            </form>
+          )}
+
           <div
             style={{ display: "flex", flexDirection: "column", gap: "10px" }}
           >
-            {expenses.map((exp) => (
-              <div
-                key={exp.id}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "16px",
-                  backgroundColor: "var(--surface-color)",
-                  border: "1px solid var(--border-color)",
-                  borderRadius: "12px",
-                }}
-              >
-                <div>
-                  <div style={{ fontSize: "0.95rem", fontWeight: "600" }}>
-                    {exp.title}
+            {expenses.length === 0 ? (
+              <div style={{ textAlign: "center", color: "var(--text-muted)", padding: "20px", fontSize: "0.85rem" }}>Chưa có chi phí nào được ghi nhận.</div>
+            ) : (
+              expenses.map((exp) => (
+                <div key={exp.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px", backgroundColor: "var(--surface-color)", border: "1px solid var(--border-color)", borderRadius: "12px" }}>
+                  <div>
+                    <div style={{ fontSize: "0.95rem", fontWeight: "600" }}>{exp.title}</div>
+                    <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginTop: "4px" }}>
+                      Sửa cho: <strong style={{ color: "var(--text-primary)" }}>{exp.room?.name || "Chung"}</strong>
+                    </div>
+                    {exp.description && <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: "2px" }}>Ghi chú: {exp.description}</div>}
+                    <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "2px" }}>Ngày: {new Date(exp.date).toLocaleDateString("vi-VN")}</div>
                   </div>
-                  <div
-                    style={{
-                      fontSize: "0.8rem",
-                      color: "var(--text-secondary)",
-                      marginTop: "4px",
-                    }}
-                  >
-                    Sửa cho:{" "}
-                    <strong style={{ color: "var(--text-primary)" }}>
-                      {exp.room}
-                    </strong>
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "0.75rem",
-                      color: "var(--text-muted)",
-                      marginTop: "2px",
-                    }}
-                  >
-                    Ngày: {exp.date}
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px" }}>
+                    <div style={{ fontSize: "1.1rem", fontWeight: "700", color: "var(--warning)" }}>-{formatCurrency(exp.amount)}</div>
+                    <button onClick={() => handleDeleteExpense(exp.id)} style={{ backgroundColor: "transparent", border: "none", color: "var(--danger)", fontSize: "0.75rem", cursor: "pointer", textDecoration: "underline", padding: 0 }}>Xóa</button>
                   </div>
                 </div>
-                <div
-                  style={{
-                    fontSize: "1.1rem",
-                    fontWeight: "700",
-                    color: "var(--warning)",
-                  }}
-                >
-                  -{formatCurrency(exp.amount)}
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </section>
       )}

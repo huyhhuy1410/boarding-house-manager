@@ -1,13 +1,17 @@
 import { BillRepository } from "../repositories/bill.repository";
 import { RoomRepository } from "../repositories/room.repository";
 import { Bill } from "@prisma/client";
+import { AppError } from "../errors/app-error";
 
+/**
+ * Service to handle billing logic and calculations.
+ */
 export class BillService {
   private billRepository = new BillRepository();
   private roomRepository = new RoomRepository();
 
   /**
-   * Tính toán hóa đơn tự động và tạo mới
+   * Automatically calculates and persists a monthly bill.
    */
   async calculateAndCreateBill(input: {
     roomId: string;
@@ -15,55 +19,47 @@ export class BillService {
     year: number;
     newElectricity: number;
     newWater: number;
-    // Chỉ số điện cũ và nước cũ sẽ lấy từ hóa đơn gần nhất hoặc giá trị mặc định lúc nhận phòng
     oldElectricity: number;
     oldWater: number;
     extraAmount?: number;
     extraDescription?: string;
   }): Promise<Bill> {
-    // 1. Kiểm tra phòng trọ có tồn tại không
+    // 1. Verify room exists
     const room = await this.roomRepository.findById(input.roomId);
     if (!room) {
-      throw new Error("Phòng trọ không tồn tại!");
+      throw new AppError("Phòng trọ không tồn tại!", 404);
     }
 
-    // 2. Chỉ xuất hóa đơn cho phòng đang có khách thuê (status === 'OCCUPIED')
+    // 2. Only issue bills for occupied rooms
     if (room.status !== "OCCUPIED") {
-      throw new Error(
+      throw new AppError(
         "Không thể xuất hóa đơn cho phòng trống hoặc đang bảo trì!",
+        400
       );
     }
 
-    // 3. Kiểm tra xem phòng này đã có hóa đơn cho tháng/năm này chưa
+    // 3. Prevent duplicate monthly billing for the same room
     const existingBill = await this.billRepository.findByRoomAndPeriod(
       input.roomId,
       input.month,
-      input.year,
+      input.year
     );
     if (existingBill) {
-      throw new Error(
+      throw new AppError(
         `Phòng này đã được lập hóa đơn cho tháng ${input.month}/${input.year} rồi!`,
+        400
       );
     }
 
-    // 4. Validate chỉ số mới không được nhỏ hơn chỉ số cũ
+    // 4. Validate utility readings
     if (input.newElectricity < input.oldElectricity) {
-      throw new Error("Số điện mới không được nhỏ hơn số điện cũ!");
+      throw new AppError("Số điện mới không được nhỏ hơn số điện cũ!", 400);
     }
     if (input.newWater < input.oldWater) {
-      throw new Error("Số nước mới không được nhỏ hơn số nước cũ!");
+      throw new AppError("Số nước mới không được nhỏ hơn số nước cũ!", 400);
     }
 
-    // TODO: 5. Tính toán các khoản tiền dựa theo công thức:
-    // - rentAmount = room.price
-    // - electricityAmount = (newElectricity - oldElectricity) * room.electricityPrice
-    // - waterAmount = (newWater - oldWater) * room.waterPrice
-    // - internetAmount = room.internetPrice
-    // - trashAmount = room.trashPrice
-    // - extraAmount = input.extraAmount || 0
-    // - totalAmount = rentAmount + electricityAmount + waterAmount + internetAmount + trashAmount + extraAmount
-    // Gợi ý: Hãy chuyển đổi các trường kiểu Decimal của Prisma sang kiểu number bằng cách gọi .toNumber() trước khi cộng trừ nhân chia!
-    // Ví dụ: const rentAmount = room.price.toNumber();
+    // 5. Calculate line items
     const rentAmount = room.price.toNumber();
     const electricityAmount = room.isElectricityIncluded
       ? 0
@@ -82,7 +78,7 @@ export class BillService {
       trashAmount +
       extraAmount;
 
-    // TODO: 6. Gọi hàm this.billRepository.create(...) để lưu hóa đơn vào cơ sở dữ liệu và trả về kết quả
+    // 6. Persist to database
     return this.billRepository.create({
       roomId: input.roomId,
       month: input.month,
@@ -102,19 +98,19 @@ export class BillService {
   }
 
   /**
-   * Lấy danh sách hóa đơn theo tháng/năm
+   * Retrieves bills for a specific period.
    */
   async getBillsByPeriod(month: number, year: number): Promise<Bill[]> {
     return this.billRepository.findByPeriod(month, year);
   }
 
   /**
-   * Đóng tiền phòng (cập nhật trạng thái thanh toán)
+   * Marks a bill as paid.
    */
   async payBill(id: string): Promise<Bill> {
     const bill = await this.billRepository.findById(id);
     if (!bill) {
-      throw new Error("Hóa đơn không tồn tại!");
+      throw new AppError("Hóa đơn không tồn tại!", 404);
     }
     return this.billRepository.updatePaymentStatus(id, true);
   }

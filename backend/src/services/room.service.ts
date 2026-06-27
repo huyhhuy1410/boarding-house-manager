@@ -1,29 +1,33 @@
 import { RoomRepository } from "../repositories/room.repository";
 import { Room } from "@prisma/client";
+import { AppError } from "../errors/app-error";
 
+/**
+ * Service to handle business logic for rooms.
+ */
 export class RoomService {
   private roomRepository = new RoomRepository();
 
   /**
-   * Nghiệp vụ lấy toàn bộ phòng trọ
+   * Retrieves all rooms.
    */
   async getAllRooms(): Promise<Room[]> {
     return this.roomRepository.findAll();
   }
 
   /**
-   * Nghiệp vụ tìm phòng trọ theo ID
+   * Finds a room by ID, throws AppError 404 if not found.
    */
   async getRoomById(id: string): Promise<Room> {
     const room = await this.roomRepository.findById(id);
     if (!room) {
-      throw new Error("Không tìm thấy phòng trọ!");
+      throw new AppError("Không tìm thấy phòng trọ!", 404);
     }
     return room;
   }
 
   /**
-   * Nghiệp vụ tạo phòng trọ mới (Có validate tên phòng)
+   * Creates a new room. Throws AppError 400 if room name exists.
    */
   async createRoom(data: {
     name: string;
@@ -41,36 +45,29 @@ export class RoomService {
   }): Promise<Room> {
     const room = await this.roomRepository.findByName(data.name);
     if (room) {
-      throw new Error("Tên phòng trọ đã tồn tại!");
+      throw new AppError("Tên phòng trọ đã tồn tại!", 400);
     }
     return this.roomRepository.create(data);
   }
 
   /**
-   * Nghiệp vụ cập nhật phòng trọ
+   * Updates an existing room.
    */
   async updateRoom(id: string, data: Partial<Room>): Promise<Room> {
-    // TODO:
-    // 1. Kiểm tra phòng có tồn tại không bằng cách gọi `this.getRoomById(id)`
-    // 2. Nếu cập nhật tên phòng (`data.name`), cần kiểm tra tên mới đó có bị trùng với phòng khác không
-    // 3. Gọi `roomRepository.update(id, data)` để cập nhật
     await this.getRoomById(id);
     if (data.name) {
       const existingRoom = await this.roomRepository.findByName(data.name);
       if (existingRoom && existingRoom.id !== id) {
-        throw new Error("Tên phòng trọ đã tồn tại!");
+        throw new AppError("Tên phòng trọ đã tồn tại!", 400);
       }
     }
     return this.roomRepository.update(id, data);
   }
 
   /**
-   * Nghiệp vụ xóa phòng trọ
+   * Deletes a room.
    */
   async deleteRoom(id: string): Promise<Room> {
-    // TODO:
-    // 1. Kiểm tra phòng có tồn tại không bằng cách gọi `this.getRoomById(id)`
-    // 2. Gọi `roomRepository.delete(id)` để xóa
     await this.getRoomById(id);
     return this.roomRepository.delete(id);
   }

@@ -2,10 +2,14 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
+const hasSingleQuoteInPath = __dirname.includes("'");
+
 export default defineConfig({
   plugins: [
     react(),
-    VitePWA({
+    // Disable VitePWA if the directory path contains a single quote (') 
+    // to prevent Workbox generation from crashing due to absolute path syntax errors.
+    !hasSingleQuoteInPath && VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
       manifest: {
@@ -37,12 +41,12 @@ export default defineConfig({
         ]
       }
     })
-  ],
+  ].filter(Boolean) as any,
   server: {
-    port: 3000,
+    port: 3005,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'http://localhost:5005',
         changeOrigin: true,
         secure: false
       }

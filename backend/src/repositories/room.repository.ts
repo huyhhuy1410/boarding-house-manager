@@ -6,25 +6,17 @@ export class RoomRepository {
    * Lấy danh sách tất cả phòng trọ (Nạp kèm thông tin Dãy trọ)
    */
   async findAll(): Promise<Room[]> {
-    try {
-      const response = await prisma.room.findMany({
-        include: {
-          boardingHouse: true,
-          bills: {
-            orderBy: [
-              { year: "desc" },
-              { month: "desc" },
-            ],
-            take: 1,
-          },
+    const response = await prisma.room.findMany({
+      include: {
+        boardingHouse: true,
+        bills: {
+          orderBy: [{ year: "desc" }, { month: "desc" }],
+          take: 1,
         },
-        orderBy: { name: "asc" },
-      });
-      return response;
-    } catch (error) {
-      console.error("Error finding rooms:", error);
-      throw error;
-    }
+      },
+      orderBy: { name: "asc" },
+    });
+    return response;
   }
 
   /**
@@ -36,10 +28,7 @@ export class RoomRepository {
       include: {
         boardingHouse: true,
         bills: {
-          orderBy: [
-            { year: "desc" },
-            { month: "desc" },
-          ],
+          orderBy: [{ year: "desc" }, { month: "desc" }],
           take: 1,
         },
       },
