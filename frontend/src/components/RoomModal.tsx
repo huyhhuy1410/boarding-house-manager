@@ -357,7 +357,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
         </div>
 
         {/* Buttons điều hướng */}
-        <div className="flex gap-2.5 mt-6 border-t border-border pt-4.5">
+        <div className="flex gap-2.5 mt-5 border-t border-border pt-4">
           {editingRoom && (
             <button
               type="button"
