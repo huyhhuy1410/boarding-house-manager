@@ -4,6 +4,7 @@ import {
   Calendar,
   CheckCircle2,
   AlertCircle,
+  Activity,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -45,6 +46,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   // Tính tổng số tiền phòng thực tế cần thu và số phòng chưa đóng tiền
   const paidRoomsCount = rooms.filter((r) => r.status === "OCCUPIED" && r.isPaidThisMonth).length;
   const unpaidRooms = occupiedRooms - paidRoomsCount;
+
+  // Tính tổng chi phí sửa chữa/bảo trì
+  const totalExpensesAmount = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
 
   // Định dạng trục đứng cho Recharts: ví dụ 15.000.000đ -> 15Tr
   const formatYAxis = (value: number) => {
@@ -114,8 +118,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             <Calendar size={18} />
           </div>
           <div>
-            <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Tháng hiện tại</div>
-            <div style={{ fontSize: "1.1rem", fontWeight: "bold" }}>Tháng {selectedMonth}/{selectedYear}</div>
+            <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)", display: "block" }}>Tháng hiện tại</span>
+            <span style={{ fontSize: "1.1rem", fontWeight: "bold", display: "block" }}>Tháng {selectedMonth}/{selectedYear}</span>
           </div>
         </div>
 
@@ -124,8 +128,18 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             <DollarSign size={18} />
           </div>
           <div>
-            <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Tổng tiền thuê</div>
-            <div style={{ fontSize: "1.1rem", fontWeight: "bold" }}>{formatCurrency(totalRentAmount)}</div>
+            <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)", display: "block" }}>Tổng tiền thuê</span>
+            <span style={{ fontSize: "1.1rem", fontWeight: "bold", display: "block" }}>{formatCurrency(totalRentAmount)}</span>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon" style={{ backgroundColor: "rgba(245, 158, 11, 0.15)", color: "var(--warning)" }}>
+            <Activity size={18} />
+          </div>
+          <div>
+            <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)", display: "block" }}>Chi phí sửa chữa</span>
+            <span style={{ fontSize: "1.1rem", fontWeight: "bold", display: "block" }}>{formatCurrency(totalExpensesAmount)}</span>
           </div>
         </div>
 
@@ -134,8 +148,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             <CheckCircle2 size={18} />
           </div>
           <div>
-            <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Đã đóng tiền</div>
-            <div style={{ fontSize: "1.1rem", fontWeight: "bold" }}>{paidRoomsCount} phòng</div>
+            <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)", display: "block" }}>Đã đóng tiền</span>
+            <span style={{ fontSize: "1.1rem", fontWeight: "bold", display: "block" }}>{paidRoomsCount} phòng</span>
           </div>
         </div>
 
@@ -144,8 +158,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             <AlertCircle size={18} />
           </div>
           <div>
-            <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Chưa đóng tiền</div>
-            <div style={{ fontSize: "1.1rem", fontWeight: "bold" }}>{unpaidRooms} phòng</div>
+            <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)", display: "block" }}>Chưa đóng tiền</span>
+            <span style={{ fontSize: "1.1rem", fontWeight: "bold", display: "block" }}>{unpaidRooms} phòng</span>
           </div>
         </div>
       </section>
