@@ -320,14 +320,14 @@ Parker cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
   };
 
   return (
-    <div className="max-w-[480px] mx-auto p-4 flex flex-col gap-5">
+    <div className="max-w-[480px] mx-auto px-4 pt-4 flex flex-col gap-4">
       {/* 1. APP HEADER */}
-      <header className="flex justify-between items-center py-2">
+      <header className="flex justify-between items-center pt-1 pb-2">
         <div>
-          <h1 className="text-[20px] font-extrabold bg-gradient-to-r from-white to-indigo-200 bg-clip-text text-transparent">
+          <h1 className="text-[22px] font-extrabold bg-gradient-to-r from-white to-indigo-200 bg-clip-text text-transparent leading-tight">
             Quản Lý Trọ Việt
           </h1>
-          <p className="text-[11.5px] text-slate-400 mt-0.5">
+          <p className="text-[12px] text-slate-500 mt-0.5 tracking-wide">
             Hệ thống hỗ trợ chốt phòng di động
           </p>
         </div>
@@ -341,7 +341,7 @@ Parker cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
       )}
 
       {/* MAIN CONTAINER CONTENT VIEW */}
-      <main className="pb-20 flex flex-col gap-4">
+      <main className="pb-24 flex flex-col gap-4">
         {loading && (
           <div className="fixed top-5 left-1/2 -translate-x-1/2 bg-indigo-600 text-white px-3.5 py-1.5 rounded-full text-[11.5px] font-bold z-[9999] shadow-lg">
             Đang tải dữ liệu...
@@ -427,7 +427,7 @@ Parker cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
       />
 
       {/* 3. BOTTOM TAB BAR (iOS STYLE) */}
-      <nav className="bottom-nav fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-[#151f32]/90 backdrop-blur-[15px] border-t border-border flex justify-around pt-2.5 pb-[calc(8px+var(--safe-area-bottom))] z-50">
+      <nav className="bottom-nav fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-[#151f32]/95 backdrop-blur-[20px] border-t border-border flex justify-around pt-3 pb-[calc(10px+var(--safe-area-bottom))] z-50">
         <button
           className={`flex flex-col items-center gap-1 bg-transparent border-0 text-[11px] font-medium cursor-pointer flex-1 ${
             activeTab === "home" ? "text-indigo-500" : "text-slate-400 hover:text-slate-200"

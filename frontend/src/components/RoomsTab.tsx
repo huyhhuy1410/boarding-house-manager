@@ -107,10 +107,10 @@ export const RoomsTab: React.FC<RoomsTabProps> = ({
                 <div className="room-renter text-[13px] text-slate-300 min-h-[50px] flex flex-col justify-center gap-1">
                   {room.status === "OCCUPIED" ? (
                     <>
-                      <div className="font-semibold text-slate-100 flex items-center">
+                      <div className="font-semibold text-slate-100 flex flex-wrap items-center gap-1">
                         {room.renterName}
                         {isNewRenter && (
-                          <span className="text-[8.5px] px-1.5 py-0.5 rounded bg-indigo-950/50 text-indigo-400 border border-indigo-900/60 font-bold ml-1.5">
+                          <span className="text-[8.5px] px-1.5 py-0.5 rounded bg-indigo-950/50 text-indigo-400 border border-indigo-900/60 font-bold">
                             Mới
                           </span>
                         )}
@@ -136,11 +136,11 @@ export const RoomsTab: React.FC<RoomsTabProps> = ({
                   <span>Tháng này:</span>
                   {room.status === "OCCUPIED" ? (
                     room.isPaidThisMonth ? (
-                      <span className="color-[#10b981] font-semibold flex items-center gap-1">
+                      <span className="text-emerald-400 font-semibold flex items-center gap-1">
                         <CheckCircle2 size={12} className="text-emerald-400" /> Đã đóng
                       </span>
                     ) : (
-                      <span className="color-[#ef4444] font-semibold flex items-center gap-1">
+                      <span className="text-red-400 font-semibold flex items-center gap-1">
                         <AlertCircle size={12} className="text-red-400" /> Chưa đóng
                       </span>
                     )

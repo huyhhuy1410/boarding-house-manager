@@ -65,11 +65,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     <>
       {/* BIỂU ĐỒ DOANH THU & CHI PHÍ SỬA CHỮA */}
       <section className="flex flex-col gap-2.5 bg-surface border border-border p-4 rounded-2xl">
-        <div className="flex flex-col">
-          <span className="text-[12.5px] text-slate-400 uppercase tracking-wider">
+        <div className="flex flex-col gap-0.5">
+          <span className="text-[11px] text-slate-500 uppercase tracking-widest font-medium">
             Dòng tiền
           </span>
-          <h3 className="text-base font-bold text-slate-100">
+          <h3 className="text-[15px] font-bold text-slate-100">
             Hiệu số Thu - Chi thực tế
           </h3>
         </div>
@@ -159,33 +159,37 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       </section>
 
       {/* Chi phí phát sinh gần nhất */}
-      <section className="flex flex-col gap-2.5">
-        <h4 className="text-[13px] text-slate-400 uppercase tracking-wider">
-          Chi phí phát sinh gần nhất
-        </h4>
+      <section className="bg-surface border border-border rounded-2xl overflow-hidden">
+        <div className="px-4 pt-4 pb-3 border-b border-border">
+          <h4 className="text-[12px] text-slate-500 uppercase tracking-widest font-medium">
+            Chi phí phát sinh gần nhất
+          </h4>
+        </div>
         {expenses.length === 0 ? (
-          <div className="text-center text-slate-400 py-6 px-4 bg-surface border border-border rounded-xl text-[13px]">
+          <div className="text-center text-slate-400 py-8 px-4 text-[13px]">
             Chưa có chi phí nào phát sinh.
           </div>
         ) : (
-          expenses.slice(0, 5).map((exp) => (
-            <div
-              key={exp.id}
-              className="flex justify-between items-center p-3.5 bg-surface border border-border rounded-xl"
-            >
-              <div>
-                <div className="text-[13.5px] font-medium text-slate-100">
-                  {exp.title}
+          <div className="flex flex-col divide-y divide-border">
+            {expenses.slice(0, 5).map((exp) => (
+              <div
+                key={exp.id}
+                className="flex justify-between items-center px-4 py-3"
+              >
+                <div>
+                  <div className="text-[13.5px] font-medium text-slate-100">
+                    {exp.title}
+                  </div>
+                  <div className="text-[11.5px] text-slate-400 mt-0.5">
+                    Phạm vi: {exp.room?.name || "Chung"} • {new Date(exp.date).toLocaleDateString("vi-VN")}
+                  </div>
                 </div>
-                <div className="text-[11.5px] text-slate-400 mt-1">
-                  Phạm vi: {exp.room?.name || "Chung"} • {new Date(exp.date).toLocaleDateString("vi-VN")}
+                <div className="font-bold text-amber-500 text-[14px] shrink-0 ml-3">
+                  -{formatCurrency(exp.amount)}
                 </div>
               </div>
-              <div className="font-bold text-amber-500 text-[14px]">
-                -{formatCurrency(exp.amount)}
-              </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </section>
     </>

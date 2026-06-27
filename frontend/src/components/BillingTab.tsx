@@ -63,14 +63,16 @@ export const BillingTab: React.FC<BillingTabProps> = ({
   };
 
   return (
-    <section className="flex flex-col gap-3.5 py-2">
-      <h3 className="text-lg font-bold text-slate-100">Chỉ số điện nước tháng này</h3>
-      <p className="text-[13px] text-slate-400 -mt-2">
-        Nhập nhanh chỉ số điện nước cuối tháng để tạo hóa đơn gửi khách.
-      </p>
+    <section className="flex flex-col gap-4">
+      <div>
+        <h3 className="text-[17px] font-bold text-slate-100">Chỉ số điện nước tháng này</h3>
+        <p className="text-[12.5px] text-slate-500 mt-1">
+          Nhập nhanh chỉ số điện nước cuối tháng để tạo hóa đơn gửi khách.
+        </p>
+      </div>
 
       {/* Bộ lọc Dãy trọ cho tab Ghi số điện (Billing) */}
-      <div className="tabs-container flex bg-surface border border-border p-1 rounded-xl gap-1 overflow-x-auto mb-1">
+      <div className="tabs-container flex bg-surface border border-border p-1 rounded-xl gap-1 overflow-x-auto">
         <button
           className={`flex-1 py-2 px-3.5 rounded-lg text-[13px] font-medium transition-all whitespace-nowrap active-scale ${
             roomFilter === "ALL" ? "bg-indigo-600 text-white shadow-md" : "text-slate-400 hover:text-slate-200"
@@ -139,21 +141,21 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                 key={room.id}
                 className="bg-surface border border-border rounded-2xl p-4 flex flex-col gap-3"
               >
-                <div className="flex justify-between items-center border-b border-border pb-2">
-                  <span className="text-[16px] font-bold text-slate-100 flex items-center gap-1.5">
+                <div className="flex justify-between items-start border-b border-border pb-2.5 gap-2">
+                  <span className="text-[16px] font-bold text-slate-100 flex flex-wrap items-center gap-1.5">
                     {room.name}
                     {isNewRenter && (
-                      <span className="text-[8.5px] px-1.5 py-0.5 rounded bg-indigo-950/50 text-indigo-400 border border-indigo-900/60 font-bold ml-1.5">
+                      <span className="text-[8.5px] px-1.5 py-0.5 rounded bg-indigo-950/50 text-indigo-400 border border-indigo-900/60 font-bold">
                         Mới
                       </span>
                     )}
                     {room.isElectricityIncluded && (
-                      <span className="text-[8.5px] px-1.5 py-0.5 rounded bg-emerald-950/50 text-emerald-400 border border-emerald-900/60 font-bold ml-1.5">
+                      <span className="text-[8.5px] px-1.5 py-0.5 rounded bg-emerald-950/50 text-emerald-400 border border-emerald-900/60 font-bold">
                         Bao Điện
                       </span>
                     )}
                     <span
-                      className={`text-[8.5px] px-1.5 py-0.5 rounded border font-bold ml-1.5 ${
+                      className={`text-[8.5px] px-1.5 py-0.5 rounded border font-bold ${
                         new Date().getDate() === room.billingDay
                           ? "bg-amber-950/50 text-amber-400 border-amber-900/60 font-extrabold animate-pulse"
                           : "bg-slate-800/40 text-slate-400 border-slate-700/60"
@@ -162,8 +164,8 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                       {new Date().getDate() === room.billingDay ? `Đến hạn (Ngày ${room.billingDay})` : `Hạn: Ngày ${room.billingDay}`}
                     </span>
                   </span>
-                  <span className="text-[12.5px] text-slate-400">
-                    Khách: {room.renterName}
+                  <span className="text-[12px] text-slate-500 shrink-0 pt-0.5">
+                    {room.renterName}
                   </span>
                 </div>
 
