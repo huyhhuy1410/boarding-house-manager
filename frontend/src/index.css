@@ -19,10 +19,13 @@
   }
 
   body {
-    @apply bg-[#0b0f19] text-[#f8fafc] min-h-screen overflow-x-hidden;
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    @apply bg-[#0b0f19] text-[#f8fafc] min-h-screen overflow-x-hidden font-sans;
     padding-top: var(--safe-area-top);
     padding-bottom: calc(76px + var(--safe-area-bottom));
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight;
   }
 }
 
@@ -49,3 +52,28 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #314b77;
 }
+
+/* Fix native date input styling on iOS Safari */
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 38px;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+/* Fix native select arrow on iOS Safari and modern browsers */
+select {
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 36px !important;
+}
+
+

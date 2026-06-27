@@ -94,7 +94,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 formatter={(value: number) => [formatCurrency(value), ""]}
               />
               <Legend verticalAlign="top" height={36} iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, color: "var(--text-primary)" }} />
-              <Bar name="Tiền phòng chốt" dataKey="revenue" fill="var(--primary-color)" radius={[4, 4, 0, 0]}>
+              <Bar name="Tiền phòng chốt" dataKey="income" fill="var(--primary-color)" radius={[4, 4, 0, 0]}>
                 {chartData.map((_entry, index) => (
                   <Cell key={`cell-${index}`} fill={index === chartData.length - 1 ? "var(--primary-color)" : "rgba(79, 70, 229, 0.4)"} />
                 ))}
