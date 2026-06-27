@@ -24,18 +24,24 @@ export class TelegramController {
       const chatId = message.chat.id.toString();
       const text = message.text;
 
+      console.log(`[Telegram Bot] Incoming message from chatId: ${chatId}, text: "${text}"`);
+
       // TODO: Validate that the incoming chatId matches process.env.TELEGRAM_CHAT_ID to secure the webhook.
       // If unauthorized, log warning and return early with res.sendStatus(200) to stop Telegram retries.
       const chatIds =
         process.env.TELEGRAM_CHAT_ID?.split(",").map((id) => id.trim()) || [];
       if (chatIds.length > 0 && !chatIds.includes(chatId)) {
-        console.error("Unauthorized Telegram chat ID:", chatId);
+        console.error(`[Telegram Bot] Unauthorized Telegram chat ID: ${chatId}. Allowed: ${chatIds.join(", ")}`);
         res.sendStatus(200);
         return;
       }
 
+      console.log(`[Telegram Bot] Processing authorized command: "${text}" from chatId: ${chatId}`);
+
       // TODO: Delegate processing to telegramService.handleWebhookMessage(chatId, text)
       await this.telegramService.handleWebhookMessage(chatId, text);
+
+      console.log(`[Telegram Bot] Successfully processed command: "${text}" for chatId: ${chatId}`);
 
       // TODO: Respond with HTTP 200 OK to acknowledge receipt of the Telegram update
       res.sendStatus(200);
