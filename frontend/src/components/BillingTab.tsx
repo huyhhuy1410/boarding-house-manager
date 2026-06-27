@@ -26,6 +26,7 @@ interface BillingTabProps {
   onPayBill: (billId: string) => Promise<void>;
   onCopyZalo: (bill: Bill, roomName: string, renterName: string | null) => void;
   formatCurrency: (val: number) => string;
+  loading: boolean;
 }
 
 export const BillingTab: React.FC<BillingTabProps> = ({
@@ -42,6 +43,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({
   onPayBill,
   onCopyZalo,
   formatCurrency,
+  loading,
 }) => {
   const activeRooms = rooms.filter((r) => r.status === "OCCUPIED" && (roomFilter === "ALL" || r.boardingHouseId === roomFilter));
 
@@ -227,10 +229,11 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                         </button>
                         {!bill.isPaid && (
                           <button
-                            className="w-auto px-3.5 py-1.5 text-[12px] font-bold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition-all active-scale"
+                            disabled={loading}
+                            className="w-auto px-3.5 py-1.5 text-[12px] font-bold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition-all active-scale disabled:opacity-50"
                             onClick={() => onPayBill(bill.id)}
                           >
-                            Đã thu tiền
+                            {loading ? "Đang lưu..." : "Đã thu tiền"}
                           </button>
                         )}
                       </div>
@@ -244,20 +247,22 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                         <label className="text-[11.5px] text-slate-400 block mb-1">Số Điện Mới (Cũ: {oldElectricity})</label>
                         <input
                           type="number"
+                          disabled={loading}
                           placeholder="Nhập số điện..."
                           value={inputs.newElectricity}
                           onChange={(e) => handleInputChange(room.id, "newElectricity", e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+                          className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors disabled:opacity-50"
                         />
                       </div>
                       <div>
                         <label className="text-[11.5px] text-slate-400 block mb-1">Số Nước Mới (Cũ: {oldWater})</label>
                         <input
                           type="number"
+                          disabled={loading}
                           placeholder="Nhập số nước..."
                           value={inputs.newWater}
                           onChange={(e) => handleInputChange(room.id, "newWater", e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+                          className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors disabled:opacity-50"
                         />
                       </div>
                     </div>
@@ -267,29 +272,32 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                         <label className="text-[11.5px] text-slate-400 block mb-1">Phát sinh riêng (đ)</label>
                         <input
                           type="number"
+                          disabled={loading}
                           placeholder="0"
                           value={inputs.extraAmount}
                           onChange={(e) => handleInputChange(room.id, "extraAmount", e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+                          className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors disabled:opacity-50"
                         />
                       </div>
                       <div>
                         <label className="text-[11.5px] text-slate-400 block mb-1">Lý do phát sinh</label>
                         <input
                           type="text"
+                          disabled={loading}
                           placeholder="Ví dụ: Thay khóa..."
                           value={inputs.extraDescription}
                           onChange={(e) => handleInputChange(room.id, "extraDescription", e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+                          className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors disabled:opacity-50"
                         />
                       </div>
                     </div>
 
                     <button
-                      className="w-full py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold mt-2 transition-colors active-scale"
+                      disabled={loading}
+                      className="w-full py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold mt-2 transition-colors active-scale disabled:opacity-50"
                       onClick={() => onCreateBill(room.id, oldElectricity, oldWater)}
                     >
-                      Lưu & Tính tiền phòng
+                      {loading ? "Đang tính..." : "Lưu & Tính tiền phòng"}
                     </button>
                   </div>
                 )}

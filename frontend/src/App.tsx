@@ -389,6 +389,7 @@ Parker cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
             onPayBill={handlePayBill}
             onCopyZalo={handleCopyZalo}
             formatCurrency={formatCurrency}
+            loading={loading}
           />
         )}
 
@@ -409,6 +410,7 @@ Parker cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
             onSubmit={handleCreateExpense}
             onDelete={handleDeleteExpense}
             formatCurrency={formatCurrency}
+            loading={loading}
           />
         )}
       </main>

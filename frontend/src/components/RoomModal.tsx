@@ -270,7 +270,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
                     placeholder="Nguyễn Văn A"
                     value={renterName}
                     onChange={(e) => setRenterName(e.target.value)}
-                    className="w-full px-2.5 py-1.5 rounded-lg border border-border bg-surface text-slate-100 text-[12.5px] focus:outline-none focus:border-indigo-500"
+                    className="w-full max-w-full min-w-0 px-2.5 py-1.5 rounded-lg border border-border bg-surface text-slate-100 text-[12.5px] focus:outline-none focus:border-indigo-500 transition-colors"
                   />
                 </div>
                 <div>
@@ -280,7 +280,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
                     placeholder="090..."
                     value={renterPhone}
                     onChange={(e) => setRenterPhone(e.target.value)}
-                    className="w-full px-2.5 py-1.5 rounded-lg border border-border bg-surface text-slate-100 text-[12.5px] focus:outline-none focus:border-indigo-500"
+                    className="w-full max-w-full min-w-0 px-2.5 py-1.5 rounded-lg border border-border bg-surface text-slate-100 text-[12.5px] focus:outline-none focus:border-indigo-500 transition-colors"
                   />
                 </div>
               </div>
@@ -292,7 +292,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
                     type="number"
                     value={renterDeposit}
                     onChange={(e) => setRenterDeposit(e.target.value)}
-                    className="w-full px-2.5 py-1.5 rounded-lg border border-border bg-surface text-slate-100 text-[12.5px] focus:outline-none focus:border-indigo-500"
+                    className="w-full max-w-full min-w-0 px-2.5 py-1.5 rounded-lg border border-border bg-surface text-slate-100 text-[12.5px] focus:outline-none focus:border-indigo-500 transition-colors"
                   />
                 </div>
                 <div>
@@ -301,7 +301,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
                     type="number"
                     value={electricityDeposit}
                     onChange={(e) => setElectricityDeposit(e.target.value)}
-                    className="w-full px-2.5 py-1.5 rounded-lg border border-border bg-surface text-slate-100 text-[12.5px] focus:outline-none focus:border-indigo-500"
+                    className="w-full max-w-full min-w-0 px-2.5 py-1.5 rounded-lg border border-border bg-surface text-slate-100 text-[12.5px] focus:outline-none focus:border-indigo-500 transition-colors"
                   />
                 </div>
               </div>
@@ -328,7 +328,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
                   type="date"
                   value={rentStartDate}
                   onChange={(e) => setRentStartDate(e.target.value)}
-                  className="w-full px-2.5 py-1.5 rounded-lg border border-border bg-surface text-slate-100 text-[12.5px] focus:outline-none"
+                  className="w-full max-w-full min-w-0 px-2.5 py-1.5 rounded-lg border border-border bg-surface text-slate-100 text-[12.5px] focus:outline-none focus:border-indigo-500 transition-colors"
                 />
               </div>
 
@@ -339,7 +339,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
                     type="number"
                     value={rentStartElectricity}
                     onChange={(e) => setRentStartElectricity(e.target.value)}
-                    className="w-full px-2.5 py-1.5 rounded-lg border border-border bg-surface text-slate-100 text-[12.5px] focus:outline-none"
+                    className="w-full max-w-full min-w-0 px-2.5 py-1.5 rounded-lg border border-border bg-surface text-slate-100 text-[12.5px] focus:outline-none focus:border-indigo-500 transition-colors"
                   />
                 </div>
                 <div>
@@ -348,7 +348,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
                     type="number"
                     value={rentStartWater}
                     onChange={(e) => setRentStartWater(e.target.value)}
-                    className="w-full px-2.5 py-1.5 rounded-lg border border-border bg-surface text-slate-100 text-[12.5px] focus:outline-none"
+                    className="w-full max-w-full min-w-0 px-2.5 py-1.5 rounded-lg border border-border bg-surface text-slate-100 text-[12.5px] focus:outline-none focus:border-indigo-500 transition-colors"
                   />
                 </div>
               </div>
@@ -365,7 +365,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
               onClick={() => onDelete(editingRoom.id)}
               className="px-3.5 py-2.5 rounded-xl bg-red-950/40 border border-red-900/60 hover:bg-red-900/60 text-red-400 text-[13px] font-bold transition-colors active-scale whitespace-nowrap"
             >
-              Xóa
+              {loading ? "Đang xóa..." : "Xóa"}
             </button>
           )}
           <button
