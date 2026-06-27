@@ -350,6 +350,7 @@ export default function App() {
     try {
       setLoading(true);
       await roomService.delete(id);
+      setShowRoomModal(false); // Đóng modal popup sau khi xóa thành công
       await fetchRoomsAndBills();
     } catch (err: any) {
       alert("Lỗi khi xóa phòng: " + (err.response?.data?.error || err.message));
