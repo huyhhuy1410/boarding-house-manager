@@ -112,54 +112,48 @@ export const RoomModal: React.FC<RoomModalProps> = ({
   };
 
   return (
-    <div style={{
-      position: "fixed",
-      top: 0,
-      left: 0,
-      width: "100%",
-      height: "100%",
-      backgroundColor: "rgba(0, 0, 0, 0.7)",
-      backdropFilter: "blur(4px)",
-      WebkitBackdropFilter: "blur(4px)",
-      zIndex: 2000,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: "16px",
-    }}>
-      <form onSubmit={handleSubmit} style={{
-        backgroundColor: "var(--surface-color)",
-        border: "1px solid var(--border-color)",
-        borderRadius: "20px",
-        width: "100%",
-        maxWidth: "420px",
-        maxHeight: "90vh",
-        overflowY: "auto",
-        padding: "20px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "14px",
-        boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.4)",
-      }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border-color)", paddingBottom: "10px" }}>
-          <h3 style={{ fontSize: "1.1rem", fontWeight: "bold" }}>
+    <div className="fixed inset-0 bg-black/75 backdrop-blur-[3px] z-[2000] flex items-center justify-center p-4">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-surface border border-border rounded-2xl w-full max-w-[420px] max-h-[90vh] overflow-y-auto p-5 flex flex-col gap-4.5 shadow-2xl"
+      >
+        <div className="flex justify-between items-center border-b border-border pb-2.5">
+          <h3 className="text-[17px] font-bold text-slate-100">
             {editingRoom ? `Chỉnh sửa: ${editingRoom.name}` : "Thêm Phòng Trọ Mới"}
           </h3>
-          <button type="button" onClick={onClose} style={{ backgroundColor: "transparent", border: "none", color: "var(--text-muted)", fontSize: "1.2rem", cursor: "pointer" }}>×</button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="bg-transparent border-0 text-slate-400 hover:text-slate-200 text-xl cursor-pointer leading-none"
+          >
+            ×
+          </button>
         </div>
 
         {/* Thông tin cơ bản */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          <h4 style={{ fontSize: "0.8rem", color: "var(--primary-color)", textTransform: "uppercase", fontWeight: "bold", borderLeft: "2px solid var(--primary-color)", paddingLeft: "6px" }}>Thông tin cơ bản</h4>
+        <div className="flex flex-col gap-2.5">
+          <h4 className="text-[12.5px] text-indigo-400 uppercase font-bold tracking-wider border-l-2 border-indigo-500 pl-2">
+            Thông tin cơ bản
+          </h4>
           
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+          <div className="grid grid-cols-2 gap-2.5">
             <div>
-              <label style={{ fontSize: "0.72rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Tên phòng</label>
-              <input type="text" placeholder="Ví dụ: A1" value={name} onChange={(e) => setName(e.target.value)} style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.85rem" }} />
+              <label className="text-[11.5px] text-slate-400 block mb-1">Tên phòng</label>
+              <input
+                type="text"
+                placeholder="Ví dụ: A1"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+              />
             </div>
             <div>
-              <label style={{ fontSize: "0.72rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Thuộc dãy trọ</label>
-              <select value={boardingHouseId} onChange={(e) => setBoardingHouseId(e.target.value)} style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.85rem" }}>
+              <label className="text-[11.5px] text-slate-400 block mb-1">Thuộc dãy trọ</label>
+              <select
+                value={boardingHouseId}
+                onChange={(e) => setBoardingHouseId(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+              >
                 <option value="" disabled>-- Chọn dãy --</option>
                 {boardingHouses.map((house) => (
                   <option key={house.id} value={house.id}>{house.name}</option>
@@ -168,52 +162,98 @@ export const RoomModal: React.FC<RoomModalProps> = ({
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+          <div className="grid grid-cols-2 gap-2.5">
             <div>
-              <label style={{ fontSize: "0.72rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Giá thuê phòng (đ)</label>
-              <input type="number" placeholder="Ví dụ: 3000000" value={price} onChange={(e) => setPrice(e.target.value)} style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.85rem" }} />
+              <label className="text-[11.5px] text-slate-400 block mb-1">Giá thuê phòng (đ)</label>
+              <input
+                type="number"
+                placeholder="Ví dụ: 3000000"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+              />
             </div>
             <div>
-              <label style={{ fontSize: "0.72rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Ngày chốt (1-31)</label>
-              <input type="number" min="1" max="31" placeholder="Mặc định: 30" value={billingDay} onChange={(e) => setBillingDay(e.target.value)} style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.85rem" }} />
+              <label className="text-[11.5px] text-slate-400 block mb-1">Ngày chốt (1-31)</label>
+              <input
+                type="number"
+                min="1"
+                max="31"
+                placeholder="Mặc định: 30"
+                value={billingDay}
+                onChange={(e) => setBillingDay(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+              />
             </div>
           </div>
         </div>
 
         {/* Đơn giá dịch vụ */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          <h4 style={{ fontSize: "0.8rem", color: "var(--primary-color)", textTransform: "uppercase", fontWeight: "bold", borderLeft: "2px solid var(--primary-color)", paddingLeft: "6px" }}>Đơn giá dịch vụ</h4>
+        <div className="flex flex-col gap-2.5">
+          <h4 className="text-[12.5px] text-indigo-400 uppercase font-bold tracking-wider border-l-2 border-indigo-500 pl-2">
+            Đơn giá dịch vụ
+          </h4>
           
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+          <div className="grid grid-cols-2 gap-2.5">
             <div>
-              <label style={{ fontSize: "0.72rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Đơn giá điện (đ/kWh)</label>
-              <input type="number" placeholder="3500" value={electricityPrice} onChange={(e) => setElectricityPrice(e.target.value)} style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.85rem" }} />
+              <label className="text-[11.5px] text-slate-400 block mb-1">Điện (đ/kWh)</label>
+              <input
+                type="number"
+                placeholder="3500"
+                value={electricityPrice}
+                onChange={(e) => setElectricityPrice(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+              />
             </div>
             <div>
-              <label style={{ fontSize: "0.72rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Đơn giá nước (đ/m3)</label>
-              <input type="number" placeholder="15000" value={waterPrice} onChange={(e) => setWaterPrice(e.target.value)} style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.85rem" }} />
+              <label className="text-[11.5px] text-slate-400 block mb-1">Nước (đ/m3)</label>
+              <input
+                type="number"
+                placeholder="15000"
+                value={waterPrice}
+                onChange={(e) => setWaterPrice(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+              />
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+          <div className="grid grid-cols-2 gap-2.5">
             <div>
-              <label style={{ fontSize: "0.72rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Internet/phòng (đ)</label>
-              <input type="number" placeholder="100000" value={internetPrice} onChange={(e) => setInternetPrice(e.target.value)} style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.85rem" }} />
+              <label className="text-[11.5px] text-slate-400 block mb-1">Internet/phòng (đ)</label>
+              <input
+                type="number"
+                placeholder="100000"
+                value={internetPrice}
+                onChange={(e) => setInternetPrice(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+              />
             </div>
             <div>
-              <label style={{ fontSize: "0.72rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Rác thải/phòng (đ)</label>
-              <input type="number" placeholder="20000" value={trashPrice} onChange={(e) => setTrashPrice(e.target.value)} style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.85rem" }} />
+              <label className="text-[11.5px] text-slate-400 block mb-1">Rác thải/phòng (đ)</label>
+              <input
+                type="number"
+                placeholder="20000"
+                value={trashPrice}
+                onChange={(e) => setTrashPrice(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+              />
             </div>
           </div>
         </div>
 
         {/* Trạng thái & Khách thuê */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          <h4 style={{ fontSize: "0.8rem", color: "var(--primary-color)", textTransform: "uppercase", fontWeight: "bold", borderLeft: "2px solid var(--primary-color)", paddingLeft: "6px" }}>Trạng thái & Khách thuê</h4>
+        <div className="flex flex-col gap-2.5">
+          <h4 className="text-[12.5px] text-indigo-400 uppercase font-bold tracking-wider border-l-2 border-indigo-500 pl-2">
+            Trạng thái & Khách thuê
+          </h4>
           
           <div>
-            <label style={{ fontSize: "0.72rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Trạng thái phòng</label>
-            <select value={status} onChange={(e) => setStatus(e.target.value as any)} style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.85rem" }}>
+            <label className="text-[11.5px] text-slate-400 block mb-1">Trạng thái phòng</label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value as any)}
+              className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+            >
               <option value="VACANT">Phòng trống</option>
               <option value="OCCUPIED">Đang thuê</option>
               <option value="MAINTENANCE">Bảo trì</option>
@@ -221,47 +261,95 @@ export const RoomModal: React.FC<RoomModalProps> = ({
           </div>
 
           {status === "OCCUPIED" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "12px", borderRadius: "10px", backgroundColor: "var(--bg-color)", border: "1px dashed var(--border-color)" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+            <div className="flex flex-col gap-2.5 p-3 rounded-xl bg-[#0b0f19] border border-border border-dashed">
+              <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label style={{ fontSize: "0.7rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Tên khách thuê</label>
-                  <input type="text" placeholder="Nguyễn Văn A" value={renterName} onChange={(e) => setRenterName(e.target.value)} style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid var(--border-color)", backgroundColor: "var(--surface-color)", color: "var(--text-primary)", fontSize: "0.8rem" }} />
+                  <label className="text-[11px] text-slate-400 block mb-1">Tên khách thuê</label>
+                  <input
+                    type="text"
+                    placeholder="Nguyễn Văn A"
+                    value={renterName}
+                    onChange={(e) => setRenterName(e.target.value)}
+                    className="w-full px-2.5 py-1.5 rounded-lg border border-border bg-surface text-slate-100 text-[12.5px] focus:outline-none focus:border-indigo-500"
+                  />
                 </div>
                 <div>
-                  <label style={{ fontSize: "0.7rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Số điện thoại</label>
-                  <input type="text" placeholder="090..." value={renterPhone} onChange={(e) => setRenterPhone(e.target.value)} style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid var(--border-color)", backgroundColor: "var(--surface-color)", color: "var(--text-primary)", fontSize: "0.8rem" }} />
+                  <label className="text-[11px] text-slate-400 block mb-1">Số điện thoại</label>
+                  <input
+                    type="text"
+                    placeholder="090..."
+                    value={renterPhone}
+                    onChange={(e) => setRenterPhone(e.target.value)}
+                    className="w-full px-2.5 py-1.5 rounded-lg border border-border bg-surface text-slate-100 text-[12.5px] focus:outline-none focus:border-indigo-500"
+                  />
                 </div>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+              <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label style={{ fontSize: "0.7rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Cọc phòng (đ)</label>
-                  <input type="number" value={renterDeposit} onChange={(e) => setRenterDeposit(e.target.value)} style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid var(--border-color)", backgroundColor: "var(--surface-color)", color: "var(--text-primary)", fontSize: "0.8rem" }} />
+                  <label className="text-[11px] text-slate-400 block mb-1">Cọc phòng (đ)</label>
+                  <input
+                    type="number"
+                    value={renterDeposit}
+                    onChange={(e) => setRenterDeposit(e.target.value)}
+                    className="w-full px-2.5 py-1.5 rounded-lg border border-border bg-surface text-slate-100 text-[12.5px] focus:outline-none focus:border-indigo-500"
+                  />
                 </div>
                 <div>
-                  <label style={{ fontSize: "0.7rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Cọc điện gối (đ)</label>
-                  <input type="number" value={electricityDeposit} onChange={(e) => setElectricityDeposit(e.target.value)} style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid var(--border-color)", backgroundColor: "var(--surface-color)", color: "var(--text-primary)", fontSize: "0.8rem" }} />
+                  <label className="text-[11px] text-slate-400 block mb-1">Cọc điện gối (đ)</label>
+                  <input
+                    type="number"
+                    value={electricityDeposit}
+                    onChange={(e) => setElectricityDeposit(e.target.value)}
+                    className="w-full px-2.5 py-1.5 rounded-lg border border-border bg-surface text-slate-100 text-[12.5px] focus:outline-none focus:border-indigo-500"
+                  />
                 </div>
               </div>
 
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", margin: "4px 0" }}>
-                <input type="checkbox" id="modalIsElecInc" checked={isElectricityIncluded} onChange={(e) => setIsElectricityIncluded(e.target.checked)} />
-                <label htmlFor="modalIsElecInc" style={{ fontSize: "0.72rem", color: "var(--text-secondary)", cursor: "pointer" }}>Bao tiền điện (áp dụng cho 3 Trời)</label>
+              <div className="flex items-center gap-2 py-1">
+                <input
+                  type="checkbox"
+                  id="modalIsElecInc"
+                  checked={isElectricityIncluded}
+                  onChange={(e) => setIsElectricityIncluded(e.target.checked)}
+                  className="rounded border-border text-indigo-600 focus:ring-0 focus:ring-offset-0 bg-[#0b0f19] cursor-pointer"
+                />
+                <label
+                  htmlFor="modalIsElecInc"
+                  className="text-[11.5px] text-slate-400 cursor-pointer select-none"
+                >
+                  Bao tiền điện (cho 3 Trời)
+                </label>
               </div>
 
               <div>
-                <label style={{ fontSize: "0.7rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Ngày bắt đầu thuê</label>
-                <input type="date" value={rentStartDate} onChange={(e) => setRentStartDate(e.target.value)} style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid var(--border-color)", backgroundColor: "var(--surface-color)", color: "var(--text-primary)", fontSize: "0.8rem" }} />
+                <label className="text-[11px] text-slate-400 block mb-1">Ngày bắt đầu thuê</label>
+                <input
+                  type="date"
+                  value={rentStartDate}
+                  onChange={(e) => setRentStartDate(e.target.value)}
+                  className="w-full px-2.5 py-1.5 rounded-lg border border-border bg-surface text-slate-100 text-[12.5px] focus:outline-none"
+                />
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+              <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label style={{ fontSize: "0.7rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Số điện ban đầu</label>
-                  <input type="number" value={rentStartElectricity} onChange={(e) => setRentStartElectricity(e.target.value)} style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid var(--border-color)", backgroundColor: "var(--surface-color)", color: "var(--text-primary)", fontSize: "0.8rem" }} />
+                  <label className="text-[11px] text-slate-400 block mb-1">Số điện đầu</label>
+                  <input
+                    type="number"
+                    value={rentStartElectricity}
+                    onChange={(e) => setRentStartElectricity(e.target.value)}
+                    className="w-full px-2.5 py-1.5 rounded-lg border border-border bg-surface text-slate-100 text-[12.5px] focus:outline-none"
+                  />
                 </div>
                 <div>
-                  <label style={{ fontSize: "0.7rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Số nước ban đầu</label>
-                  <input type="number" value={rentStartWater} onChange={(e) => setRentStartWater(e.target.value)} style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid var(--border-color)", backgroundColor: "var(--surface-color)", color: "var(--text-primary)", fontSize: "0.8rem" }} />
+                  <label className="text-[11px] text-slate-400 block mb-1">Số nước đầu</label>
+                  <input
+                    type="number"
+                    value={rentStartWater}
+                    onChange={(e) => setRentStartWater(e.target.value)}
+                    className="w-full px-2.5 py-1.5 rounded-lg border border-border bg-surface text-slate-100 text-[12.5px] focus:outline-none"
+                  />
                 </div>
               </div>
             </div>
@@ -269,12 +357,30 @@ export const RoomModal: React.FC<RoomModalProps> = ({
         </div>
 
         {/* Buttons điều hướng */}
-        <div style={{ display: "flex", gap: "10px", marginTop: "12px", borderTop: "1px solid var(--border-color)", paddingTop: "14px" }}>
+        <div className="flex gap-2.5 mt-3 border-t border-border pt-4">
           {editingRoom && (
-            <button type="button" disabled={loading} onClick={() => onDelete(editingRoom.id)} style={{ padding: "10px", borderRadius: "10px", border: "none", backgroundColor: "var(--danger-glow)", color: "var(--danger)", fontSize: "0.82rem", fontWeight: "bold", cursor: "pointer" }}>Xóa</button>
+            <button
+              type="button"
+              disabled={loading}
+              onClick={() => onDelete(editingRoom.id)}
+              className="px-3.5 py-2.5 rounded-xl bg-red-950/40 border border-red-900/60 hover:bg-red-900/60 text-red-400 text-[13px] font-bold transition-colors active-scale whitespace-nowrap"
+            >
+              Xóa
+            </button>
           )}
-          <button type="button" disabled={loading} onClick={onClose} className="btn-secondary" style={{ flex: 1, padding: "10px", fontSize: "0.82rem", backgroundColor: "transparent", color: "var(--text-secondary)", border: "1px solid var(--border-color)", borderRadius: "10px" }}>Hủy</button>
-          <button type="submit" disabled={loading} className="btn-primary" style={{ flex: 2, padding: "10px", fontSize: "0.82rem" }}>
+          <button
+            type="button"
+            disabled={loading}
+            onClick={onClose}
+            className="flex-1 py-2.5 rounded-xl border border-border text-slate-400 hover:bg-slate-800/40 text-[13px] transition-colors active-scale"
+          >
+            Hủy
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex-[2] py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition-colors active-scale"
+          >
             {loading ? "Đang lưu..." : "Lưu lại"}
           </button>
         </div>

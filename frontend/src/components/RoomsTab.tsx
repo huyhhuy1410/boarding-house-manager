@@ -34,9 +34,11 @@ export const RoomsTab: React.FC<RoomsTabProps> = ({
   return (
     <>
       {/* Tab filters */}
-      <div className="tabs-container">
+      <div className="tabs-container flex bg-surface border border-border p-1 rounded-xl gap-1 overflow-x-auto">
         <button
-          className={`tab-btn ${roomFilter === "ALL" ? "active" : ""}`}
+          className={`flex-1 py-2 px-3.5 rounded-lg text-[13px] font-medium transition-all whitespace-nowrap active-scale ${
+            roomFilter === "ALL" ? "bg-indigo-600 text-white shadow-md" : "text-slate-400 hover:text-slate-200"
+          }`}
           onClick={() => setRoomFilter("ALL")}
         >
           Tất cả
@@ -44,7 +46,9 @@ export const RoomsTab: React.FC<RoomsTabProps> = ({
         {boardingHouses.map((house) => (
           <button
             key={house.id}
-            className={`tab-btn ${roomFilter === house.id ? "active" : ""}`}
+            className={`flex-1 py-2 px-3.5 rounded-lg text-[13px] font-medium transition-all whitespace-nowrap active-scale ${
+              roomFilter === house.id ? "bg-indigo-600 text-white shadow-md" : "text-slate-400 hover:text-slate-200"
+            }`}
             onClick={() => setRoomFilter(house.id)}
           >
             {house.name}
@@ -52,20 +56,21 @@ export const RoomsTab: React.FC<RoomsTabProps> = ({
         ))}
       </div>
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "4px" }}>
-        <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>Danh sách phòng trọ</span>
+      <div className="flex justify-between items-center mt-1">
+        <span className="text-[13px] text-slate-400">Danh sách phòng trọ</span>
         <button
-          className="btn-primary"
-          style={{ width: "auto", padding: "6px 12px", borderRadius: "8px", fontSize: "0.75rem", display: "flex", alignItems: "center", gap: "4px" }}
+          className="w-auto px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[12px] font-bold flex items-center gap-1 active-scale"
           onClick={onAddRoomClick}
         >
           <Plus size={14} /> Thêm phòng
         </button>
       </div>
 
-      <div className="room-grid">
+      <div className="room-grid grid grid-cols-2 gap-3">
         {filteredRooms.length === 0 ? (
-          <div style={{ gridColumn: "1 / -1", textAlign: "center", color: "var(--text-muted)", padding: "40px 20px" }}>Chưa có phòng trọ nào. Hãy bấm "Thêm phòng" để bắt đầu!</div>
+          <div className="col-span-2 text-center text-slate-400 py-10 px-4 text-[13px]">
+            Chưa có phòng trọ nào. Hãy bấm "Thêm phòng" để bắt đầu!
+          </div>
         ) : (
           filteredRooms.map((room) => {
             const isNewRenter = room.status === "OCCUPIED" && (() => {
@@ -75,109 +80,68 @@ export const RoomsTab: React.FC<RoomsTabProps> = ({
             })();
 
             return (
-              <div key={room.id} className="room-card" onClick={() => onRoomClick(room)} style={{ cursor: "pointer" }}>
-                <div className="room-header">
-                  <span className="room-name">{room.name}</span>
-                  <span className={`room-badge ${room.status.toLowerCase()}`}>
+              <div
+                key={room.id}
+                className="room-card bg-surface border border-border rounded-2xl p-4 flex flex-col gap-3 active-scale cursor-pointer"
+                onClick={() => onRoomClick(room)}
+              >
+                <div className="flex justify-between items-center">
+                  <span className="room-name text-[16px] font-bold text-slate-100">{room.name}</span>
+                  <span
+                    className={`room-badge text-[9.5px] font-bold px-2 py-0.5 rounded-md uppercase border ${
+                      room.status === "OCCUPIED"
+                        ? "bg-emerald-950/40 text-emerald-400 border-emerald-900/60"
+                        : room.status === "VACANT"
+                          ? "bg-slate-800/60 text-slate-300 border-slate-700/60"
+                          : "bg-red-950/40 text-red-400 border-red-900/60"
+                    }`}
+                  >
                     {room.status === "OCCUPIED"
                       ? "Đang thuê"
                       : room.status === "VACANT"
-                        ? "Phòng trống"
+                        ? "Trống"
                         : "Bảo trì"}
                   </span>
                 </div>
 
-                <div className="room-renter">
+                <div className="room-renter text-[13px] text-slate-300 min-h-[50px] flex flex-col justify-center gap-1">
                   {room.status === "OCCUPIED" ? (
                     <>
-                      <div
-                        style={{
-                          fontWeight: "500",
-                          color: "var(--text-primary)",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "6px",
-                        }}
-                      >
+                      <div className="font-semibold text-slate-100 flex items-center">
                         {room.renterName}
                         {isNewRenter && (
-                          <span
-                            style={{
-                              fontSize: "0.65rem",
-                              padding: "2px 6px",
-                              borderRadius: "4px",
-                              backgroundColor: "var(--primary-glow)",
-                              color: "var(--primary-color)",
-                              fontWeight: "bold",
-                              border: "1px solid var(--primary-color)",
-                            }}
-                          >
-                            Khách Mới
+                          <span className="text-[8.5px] px-1.5 py-0.5 rounded bg-indigo-950/50 text-indigo-400 border border-indigo-900/60 font-bold ml-1.5">
+                            Mới
                           </span>
                         )}
                       </div>
-                      <div
-                        style={{
-                          fontSize: "0.75rem",
-                          color: "var(--text-muted)",
-                          marginTop: "4px",
-                        }}
-                      >
+                      <div className="text-[11.5px] text-slate-400">
                         Giá: {formatCurrency(room.price)}/tháng
                       </div>
-                      <div
-                        style={{
-                          fontSize: "0.72rem",
-                          color: "var(--text-secondary)",
-                          marginTop: "4px",
-                        }}
-                      >
-                        Cọc gối đầu: {formatCurrency((room.renterDeposit || 0) + room.electricityDeposit)}
+                      <div className="text-[11px] text-slate-400 leading-tight">
+                        Cọc: {formatCurrency((room.renterDeposit || 0) + room.electricityDeposit)}
                         {room.electricityDeposit > 0 && (
-                          <span style={{ display: "block", fontSize: "0.65rem", color: "var(--text-muted)", marginTop: "2px" }}>
-                            (Phòng: {formatCurrency(room.renterDeposit || 0)} + Điện: {formatCurrency(room.electricityDeposit)})
+                          <span className="block text-[10px] text-slate-500 mt-0.5">
+                            (Điện gối: {formatCurrency(room.electricityDeposit)})
                           </span>
                         )}
                       </div>
                     </>
                   ) : (
-                    <span
-                      style={{
-                        color: "var(--text-muted)",
-                        fontStyle: "italic",
-                      }}
-                    >
-                      Chưa có khách thuê
-                    </span>
+                    <span className="text-slate-400 italic">Chưa có khách thuê</span>
                   )}
                 </div>
 
-                <div className="room-footer">
-                  <span>Trạng thái tháng:</span>
+                <div className="border-t border-border border-dashed pt-2.5 flex justify-between items-center text-[11px] text-slate-400">
+                  <span>Tháng này:</span>
                   {room.status === "OCCUPIED" ? (
                     room.isPaidThisMonth ? (
-                      <span
-                        style={{
-                          color: "var(--success)",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                          fontWeight: "500",
-                        }}
-                      >
-                        <CheckCircle2 size={12} /> Đã đóng
+                      <span className="color-[#10b981] font-semibold flex items-center gap-1">
+                        <CheckCircle2 size={12} className="text-emerald-400" /> Đã đóng
                       </span>
                     ) : (
-                      <span
-                        style={{
-                          color: "var(--danger)",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                          fontWeight: "500",
-                        }}
-                      >
-                        <AlertCircle size={12} /> Chưa đóng
+                      <span className="color-[#ef4444] font-semibold flex items-center gap-1">
+                        <AlertCircle size={12} className="text-red-400" /> Chưa đóng
                       </span>
                     )
                   ) : (

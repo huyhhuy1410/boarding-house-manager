@@ -61,23 +61,18 @@ export const BillingTab: React.FC<BillingTabProps> = ({
   };
 
   return (
-    <section
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "14px",
-        padding: "8px 0",
-      }}
-    >
-      <h3 style={{ fontSize: "1.2rem" }}>Chỉ số điện nước tháng này</h3>
-      <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "4px" }}>
+    <section className="flex flex-col gap-3.5 py-2">
+      <h3 className="text-lg font-bold text-slate-100">Chỉ số điện nước tháng này</h3>
+      <p className="text-[13px] text-slate-400 -mt-2">
         Nhập nhanh chỉ số điện nước cuối tháng để tạo hóa đơn gửi khách.
       </p>
 
       {/* Bộ lọc Dãy trọ cho tab Ghi số điện (Billing) */}
-      <div className="tabs-container" style={{ marginBottom: "4px" }}>
+      <div className="tabs-container flex bg-surface border border-border p-1 rounded-xl gap-1 overflow-x-auto mb-1">
         <button
-          className={`tab-btn ${roomFilter === "ALL" ? "active" : ""}`}
+          className={`flex-1 py-2 px-3.5 rounded-lg text-[13px] font-medium transition-all whitespace-nowrap active-scale ${
+            roomFilter === "ALL" ? "bg-indigo-600 text-white shadow-md" : "text-slate-400 hover:text-slate-200"
+          }`}
           onClick={() => setRoomFilter("ALL")}
         >
           Tất cả
@@ -85,7 +80,9 @@ export const BillingTab: React.FC<BillingTabProps> = ({
         {boardingHouses.map((house) => (
           <button
             key={house.id}
-            className={`tab-btn ${roomFilter === house.id ? "active" : ""}`}
+            className={`flex-1 py-2 px-3.5 rounded-lg text-[13px] font-medium transition-all whitespace-nowrap active-scale ${
+              roomFilter === house.id ? "bg-indigo-600 text-white shadow-md" : "text-slate-400 hover:text-slate-200"
+            }`}
             onClick={() => setRoomFilter(house.id)}
           >
             {house.name}
@@ -93,16 +90,11 @@ export const BillingTab: React.FC<BillingTabProps> = ({
         ))}
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "12px",
-          marginTop: "10px",
-        }}
-      >
+      <div className="flex flex-col gap-3 mt-1">
         {activeRooms.length === 0 ? (
-          <div style={{ textAlign: "center", color: "var(--text-muted)", padding: "40px 20px" }}>Chưa có phòng nào đang thuê trong dãy trọ này.</div>
+          <div className="text-center text-slate-400 py-10 px-4 text-[13px]">
+            Chưa có phòng nào đang thuê trong dãy trọ này.
+          </div>
         ) : (
           activeRooms.map((room) => {
             const bill = bills.find((b) => b.roomId === room.id);
@@ -143,142 +135,99 @@ export const BillingTab: React.FC<BillingTabProps> = ({
             return (
               <div
                 key={room.id}
-                style={{
-                  backgroundColor: "var(--surface-color)",
-                  border: "1px solid var(--border-color)",
-                  borderRadius: "16px",
-                  padding: "16px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "12px",
-                }}
+                className="bg-surface border border-border rounded-2xl p-4 flex flex-col gap-3"
               >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    fontWeight: "bold",
-                    borderBottom: "1px solid var(--border-color)",
-                    paddingBottom: "8px",
-                  }}
-                >
-                  <span style={{ fontSize: "1.1rem", display: "flex", alignItems: "center", gap: "6px" }}>
+                <div className="flex justify-between items-center border-b border-border pb-2">
+                  <span className="text-[16px] font-bold text-slate-100 flex items-center gap-1.5">
                     {room.name}
                     {isNewRenter && (
-                      <span
-                        style={{
-                          fontSize: "0.65rem",
-                          padding: "2px 6px",
-                          borderRadius: "4px",
-                          backgroundColor: "var(--primary-glow)",
-                          color: "var(--primary-color)",
-                          fontWeight: "bold",
-                          border: "1px solid var(--primary-color)",
-                        }}
-                      >
-                        Khách Mới
+                      <span className="text-[8.5px] px-1.5 py-0.5 rounded bg-indigo-950/50 text-indigo-400 border border-indigo-900/60 font-bold ml-1.5">
+                        Mới
                       </span>
                     )}
                     {room.isElectricityIncluded && (
-                      <span
-                        style={{
-                          fontSize: "0.65rem",
-                          padding: "2px 6px",
-                          borderRadius: "4px",
-                          backgroundColor: "var(--success-glow)",
-                          color: "var(--success)",
-                          fontWeight: "bold",
-                          border: "1px solid var(--success)",
-                        }}
-                      >
+                      <span className="text-[8.5px] px-1.5 py-0.5 rounded bg-emerald-950/50 text-emerald-400 border border-emerald-900/60 font-bold ml-1.5">
                         Bao Điện
                       </span>
                     )}
                     <span
-                      style={{
-                        fontSize: "0.65rem",
-                        padding: "2px 6px",
-                        borderRadius: "4px",
-                        backgroundColor: new Date().getDate() === room.billingDay ? "var(--warning-glow)" : "transparent",
-                        color: new Date().getDate() === room.billingDay ? "var(--warning)" : "var(--text-muted)",
-                        fontWeight: new Date().getDate() === room.billingDay ? "bold" : "normal",
-                        border: `1px solid ${new Date().getDate() === room.billingDay ? "var(--warning)" : "var(--border-color)"}`,
-                      }}
+                      className={`text-[8.5px] px-1.5 py-0.5 rounded border font-bold ml-1.5 ${
+                        new Date().getDate() === room.billingDay
+                          ? "bg-amber-950/50 text-amber-400 border-amber-900/60 font-extrabold animate-pulse"
+                          : "bg-slate-800/40 text-slate-400 border-slate-700/60"
+                      }`}
                     >
-                      {new Date().getDate() === room.billingDay ? "Đến hạn (Ngày " + room.billingDay + ")" : "Hạn: Ngày " + room.billingDay}
+                      {new Date().getDate() === room.billingDay ? `Đến hạn (Ngày ${room.billingDay})` : `Hạn: Ngày ${room.billingDay}`}
                     </span>
                   </span>
-                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>
+                  <span className="text-[12.5px] text-slate-400">
                     Khách: {room.renterName}
                   </span>
                 </div>
 
                 {bill ? (
                   /* ĐÃ CÓ HÓA ĐƠN TRONG THÁNG NÀY */
-                  <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "0.85rem" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", color: "var(--text-secondary)" }}>
+                  <div className="flex flex-col gap-2.5 text-[13px]">
+                    <div className="grid grid-cols-2 gap-1.5 text-slate-400">
                       <div>Điện: {bill.oldElectricity} kWh ➔ {bill.newElectricity} kWh ({bill.newElectricity - bill.oldElectricity} kWh)</div>
                       <div>Nước: {bill.oldWater} m3 ➔ {bill.newWater} m3 ({bill.newWater - bill.oldWater} m3)</div>
                     </div>
 
-                    <div style={{ padding: "10px", borderRadius: "8px", backgroundColor: "var(--bg-color)", display: "flex", flexDirection: "column", gap: "4px" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <div className="p-3 rounded-lg bg-[#0b0f19] border border-border flex flex-col gap-1.5 text-slate-300">
+                      <div className="flex justify-between">
                         <span>Tiền phòng:</span>
                         <span>{formatCurrency(bill.rentAmount)}</span>
                       </div>
-                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                      <div className="flex justify-between">
                         <span>Tiền điện:</span>
                         <span>{formatCurrency(bill.electricityAmount)}</span>
                       </div>
-                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                      <div className="flex justify-between">
                         <span>Tiền nước:</span>
                         <span>{formatCurrency(bill.waterAmount)}</span>
                       </div>
                       {(bill.internetAmount > 0 || bill.trashAmount > 0) && (
-                        <div style={{ display: "flex", justifyContent: "space-between" }}>
-                          <span>Cố định (Internet + Rác):</span>
+                        <div className="flex justify-between">
+                          <span>Dịch vụ cố định (Internet + Rác):</span>
                           <span>{formatCurrency(Number(bill.internetAmount) + Number(bill.trashAmount))}</span>
                         </div>
                       )}
                       {Number(bill.extraAmount) > 0 && (
-                        <div style={{ display: "flex", justifyContent: "space-between", color: "var(--warning)" }}>
+                        <div className="flex justify-between text-amber-500">
                           <span>Phát sinh ({bill.extraDescription || "Sửa thiết bị"}):</span>
                           <span>+{formatCurrency(bill.extraAmount)}</span>
                         </div>
                       )}
-                      <div style={{ display: "flex", justifyContent: "space-between", fontWeight: "bold", borderTop: "1px solid var(--border-color)", paddingTop: "4px", fontSize: "0.95rem", color: "var(--primary-color)" }}>
+                      <div className="flex justify-between font-bold border-t border-border pt-1.5 text-[14px] text-indigo-400">
                         <span>Tổng tiền phòng:</span>
                         <span>{formatCurrency(bill.totalAmount)}</span>
                       </div>
                     </div>
 
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "4px" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <div className="flex justify-between items-center mt-1">
+                      <div className="flex items-center gap-1.5">
                         <span>Thanh toán:</span>
                         {bill.isPaid ? (
-                          <span style={{ color: "var(--success)", fontWeight: "bold", display: "flex", alignItems: "center", gap: "4px" }}>
+                          <span className="text-emerald-400 font-bold flex items-center gap-1">
                             <CheckCircle2 size={14} /> Đã đóng
                           </span>
                         ) : (
-                          <span style={{ color: "var(--danger)", fontWeight: "bold", display: "flex", alignItems: "center", gap: "4px" }}>
+                          <span className="text-red-400 font-bold flex items-center gap-1">
                             <AlertCircle size={14} /> Chưa đóng
                           </span>
                         )}
                       </div>
 
-                      <div style={{ display: "flex", gap: "8px" }}>
+                      <div className="flex gap-2">
                         <button
-                          className="btn-secondary"
-                          style={{ width: "auto", padding: "6px 10px", fontSize: "0.75rem", display: "flex", alignItems: "center", gap: "4px", backgroundColor: "transparent", color: "var(--text-secondary)", border: "1px solid var(--border-color)", borderRadius: "8px" }}
+                          className="w-auto px-3.5 py-1.5 text-[12px] font-bold flex items-center gap-1 bg-[#1e2d4a]/50 text-slate-300 border border-border rounded-lg hover:bg-[#1e2d4a] transition-all active-scale"
                           onClick={() => onCopyZalo(bill, room.name, room.renterName)}
                         >
                           <Copy size={12} /> Zalo
                         </button>
                         {!bill.isPaid && (
                           <button
-                            className="btn-primary"
-                            style={{ width: "auto", padding: "6px 10px", fontSize: "0.75rem", borderRadius: "8px" }}
+                            className="w-auto px-3.5 py-1.5 text-[12px] font-bold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition-all active-scale"
                             onClick={() => onPayBill(bill.id)}
                           >
                             Đã thu tiền
@@ -289,61 +238,55 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                   </div>
                 ) : (
                   /* CHƯA CÓ HÓA ĐƠN TRONG THÁNG NÀY: FORM NHẬP */
-                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  <div className="flex flex-col gap-2.5">
+                    <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label style={{ fontSize: "0.72rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Số Điện Mới (Cũ: {oldElectricity})</label>
+                        <label className="text-[11.5px] text-slate-400 block mb-1">Số Điện Mới (Cũ: {oldElectricity})</label>
                         <input
                           type="number"
-                          placeholder="Nhập số điện mới..."
+                          placeholder="Nhập số điện..."
                           value={inputs.newElectricity}
                           onChange={(e) => handleInputChange(room.id, "newElectricity", e.target.value)}
-                          style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.85rem" }}
+                          className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
                         />
                       </div>
                       <div>
-                        <label style={{ fontSize: "0.72rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Số Nước Mới (Cũ: {oldWater})</label>
+                        <label className="text-[11.5px] text-slate-400 block mb-1">Số Nước Mới (Cũ: {oldWater})</label>
                         <input
                           type="number"
-                          placeholder="Nhập số nước mới..."
+                          placeholder="Nhập số nước..."
                           value={inputs.newWater}
                           onChange={(e) => handleInputChange(room.id, "newWater", e.target.value)}
-                          style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.85rem" }}
+                          className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
                         />
                       </div>
                     </div>
 
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                    <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label style={{ fontSize: "0.72rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Chi phí phát sinh riêng (đ)</label>
+                        <label className="text-[11.5px] text-slate-400 block mb-1">Phát sinh riêng (đ)</label>
                         <input
                           type="number"
                           placeholder="0"
                           value={inputs.extraAmount}
                           onChange={(e) => handleInputChange(room.id, "extraAmount", e.target.value)}
-                          style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.85rem" }}
+                          className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
                         />
                       </div>
                       <div>
-                        <label style={{ fontSize: "0.72rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Mô tả phát sinh (nếu có)</label>
+                        <label className="text-[11.5px] text-slate-400 block mb-1">Lý do phát sinh</label>
                         <input
                           type="text"
-                          placeholder="Ví dụ: Thay bóng đèn..."
+                          placeholder="Ví dụ: Thay khóa..."
                           value={inputs.extraDescription}
                           onChange={(e) => handleInputChange(room.id, "extraDescription", e.target.value)}
-                          style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.85rem" }}
+                          className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
                         />
                       </div>
                     </div>
 
                     <button
-                      className="btn-primary"
-                      style={{
-                        padding: "10px",
-                        fontSize: "0.82rem",
-                        borderRadius: "8px",
-                        marginTop: "8px",
-                      }}
+                      className="w-full py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold mt-2 transition-colors active-scale"
                       onClick={() => onCreateBill(room.id, oldElectricity, oldWater)}
                     >
                       Lưu & Tính tiền phòng

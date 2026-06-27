@@ -39,23 +39,11 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({
   formatCurrency,
 }) => {
   return (
-    <section style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <h3 style={{ fontSize: "1.2rem" }}>Chi phí bảo trì / Sửa chữa</h3>
+    <section className="flex flex-col gap-3.5">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-bold text-slate-100">Chi phí bảo trì / Sửa chữa</h3>
         <button
-          className="btn-primary"
-          style={{
-            width: "auto",
-            padding: "8px 12px",
-            borderRadius: "10px",
-            fontSize: "0.8rem",
-          }}
+          className="w-auto px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[12px] font-bold flex items-center gap-1 active-scale"
           onClick={() => setShowExpenseForm(true)}
         >
           <Plus size={16} /> Thêm chi phí
@@ -65,45 +53,36 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({
       {showExpenseForm && (
         <form
           onSubmit={onSubmit}
-          style={{
-            backgroundColor: "var(--surface-color)",
-            padding: "16px",
-            borderRadius: "16px",
-            border: "1px solid var(--border-color)",
-            display: "flex",
-            flexDirection: "column",
-            gap: "12px",
-            marginTop: "8px",
-          }}
+          className="bg-surface border border-border p-4 rounded-2xl flex flex-col gap-3 mt-2 shadow-lg"
         >
-          <h4 style={{ fontWeight: "bold", fontSize: "1rem" }}>Thêm Chi Phí Mới</h4>
+          <h4 className="font-bold text-[14px] text-slate-100">Thêm Chi Phí Mới</h4>
           <div>
-            <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Tên chi phí / Lý do</label>
+            <label className="text-[11.5px] text-slate-400 block mb-1">Tên chi phí / Lý do</label>
             <input
               type="text"
               placeholder="Ví dụ: Thay vòi nước"
               value={expenseTitle}
               onChange={(e) => setExpenseTitle(e.target.value)}
-              style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.9rem" }}
+              className="w-full px-3 py-2.5 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
             />
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Số tiền (đ)</label>
+              <label className="text-[11.5px] text-slate-400 block mb-1">Số tiền (đ)</label>
               <input
                 type="number"
                 placeholder="Ví dụ: 150000"
                 value={expenseAmount}
                 onChange={(e) => setExpenseAmount(e.target.value)}
-                style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.9rem" }}
+                className="w-full px-3 py-2.5 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
               />
             </div>
             <div>
-              <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Áp dụng cho</label>
+              <label className="text-[11.5px] text-slate-400 block mb-1">Áp dụng cho</label>
               <select
                 value={expenseRoomId}
                 onChange={(e) => setExpenseRoomId(e.target.value)}
-                style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.9rem" }}
+                className="w-full px-3 py-2.5 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
               >
                 <option value="chung">Chung cả nhà</option>
                 {rooms.map((r) => (
@@ -113,22 +92,26 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({
             </div>
           </div>
           <div>
-            <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Ghi chú thêm</label>
+            <label className="text-[11.5px] text-slate-400 block mb-1">Ghi chú thêm</label>
             <input
               type="text"
               placeholder="Ghi chú chi tiết (nếu có)"
               value={expenseDesc}
               onChange={(e) => setExpenseDesc(e.target.value)}
-              style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.9rem" }}
+              className="w-full px-3 py-2.5 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
             />
           </div>
-          <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
-            <button type="submit" className="btn-primary" style={{ flex: 1, padding: "10px", fontSize: "0.85rem" }}>Lưu lại</button>
+          <div className="flex gap-2.5 mt-2">
+            <button
+              type="submit"
+              className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition-colors active-scale"
+            >
+              Lưu lại
+            </button>
             <button
               type="button"
-              className="btn-secondary"
+              className="flex-1 py-2.5 rounded-xl border border-border text-slate-400 hover:bg-slate-800/40 text-[13px] transition-colors active-scale"
               onClick={() => setShowExpenseForm(false)}
-              style={{ flex: 1, padding: "10px", fontSize: "0.85rem", backgroundColor: "transparent", color: "var(--text-secondary)", border: "1px solid var(--border-color)", borderRadius: "8px" }}
             >
               Hủy
             </button>
@@ -136,36 +119,36 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({
         </form>
       )}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+      <div className="flex flex-col gap-2.5 mt-1">
         {expenses.length === 0 ? (
-          <div style={{ textAlign: "center", color: "var(--text-muted)", padding: "20px", fontSize: "0.85rem" }}>Chưa có chi phí nào được ghi nhận.</div>
+          <div className="text-center text-slate-400 py-10 px-4 bg-surface border border-border rounded-xl text-[13px]">
+            Chưa có chi phí nào được ghi nhận.
+          </div>
         ) : (
           expenses.map((exp) => (
             <div
               key={exp.id}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "16px",
-                backgroundColor: "var(--surface-color)",
-                border: "1px solid var(--border-color)",
-                borderRadius: "12px",
-              }}
+              className="flex justify-between items-center p-4 bg-surface border border-border rounded-xl"
             >
               <div>
-                <div style={{ fontSize: "0.95rem", fontWeight: "600" }}>{exp.title}</div>
-                <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginTop: "4px" }}>
-                  Sửa cho: <strong style={{ color: "var(--text-primary)" }}>{exp.room?.name || "Chung"}</strong>
+                <div className="text-[14px] font-semibold text-slate-100">{exp.title}</div>
+                <div className="text-[12px] text-slate-400 mt-1">
+                  Sửa cho: <strong className="text-slate-200">{exp.room?.name || "Chung"}</strong>
                 </div>
-                {exp.description && <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: "2px" }}>Ghi chú: {exp.description}</div>}
-                <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "2px" }}>Ngày: {new Date(exp.date).toLocaleDateString("vi-VN")}</div>
+                {exp.description && (
+                  <div className="text-[11.5px] text-slate-500 mt-0.5">
+                    Ghi chú: {exp.description}
+                  </div>
+                )}
+                <div className="text-[11px] text-slate-500 mt-0.5">
+                  Ngày: {new Date(exp.date).toLocaleDateString("vi-VN")}
+                </div>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px" }}>
-                <div style={{ fontSize: "1.1rem", fontWeight: "700", color: "var(--warning)" }}>-{formatCurrency(exp.amount)}</div>
+              <div className="flex flex-col items-end gap-1.5">
+                <div className="text-[15.5px] font-bold text-amber-500">-{formatCurrency(exp.amount)}</div>
                 <button
                   onClick={() => onDelete(exp.id)}
-                  style={{ backgroundColor: "transparent", border: "none", color: "var(--danger)", fontSize: "0.75rem", cursor: "pointer", textDecoration: "underline", padding: 0 }}
+                  className="bg-transparent border-none text-red-400 hover:text-red-300 text-[11.5px] cursor-pointer underline p-0"
                 >
                   Xóa
                 </button>

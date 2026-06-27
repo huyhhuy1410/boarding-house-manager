@@ -320,24 +320,30 @@ Parker cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
   };
 
   return (
-    <div className="app-container">
+    <div className="max-w-[480px] mx-auto p-4 flex flex-col gap-5">
       {/* 1. APP HEADER */}
-      <header className="app-header">
-        <h1 className="app-title">Quản Lý Trọ Việt</h1>
-        <p className="app-subtitle">Hệ thống hỗ trợ chốt phòng di động</p>
+      <header className="flex justify-between items-center py-2">
+        <div>
+          <h1 className="text-[20px] font-extrabold bg-gradient-to-r from-white to-indigo-200 bg-clip-text text-transparent">
+            Quản Lý Trọ Việt
+          </h1>
+          <p className="text-[11.5px] text-slate-400 mt-0.5">
+            Hệ thống hỗ trợ chốt phòng di động
+          </p>
+        </div>
       </header>
 
       {/* ERROR MESSAGE NOTIFICATION */}
       {error && (
-        <div style={{ backgroundColor: "var(--danger-glow)", color: "var(--danger)", padding: "12px 16px", borderRadius: "12px", border: "1px solid var(--danger)", fontSize: "0.85rem", marginBottom: "16px", textAlign: "center" }}>
+        <div className="bg-red-950/40 text-red-400 p-3.5 rounded-xl border border-red-900/60 text-[13px] mb-4 text-center">
           {error}
         </div>
       )}
 
       {/* MAIN CONTAINER CONTENT VIEW */}
-      <main style={{ paddingBottom: "80px", display: "flex", flexDirection: "column", gap: "16px" }}>
+      <main className="pb-20 flex flex-col gap-4">
         {loading && (
-          <div style={{ position: "fixed", top: "20px", left: "50%", transform: "translateX(-50%)", backgroundColor: "var(--primary-color)", color: "#fff", padding: "6px 12px", borderRadius: "20px", fontSize: "0.75rem", fontWeight: "bold", zIndex: 9999, boxShadow: "0 4px 6px rgba(0,0,0,0.2)" }}>
+          <div className="fixed top-5 left-1/2 -translate-x-1/2 bg-indigo-600 text-white px-3.5 py-1.5 rounded-full text-[11.5px] font-bold z-[9999] shadow-lg">
             Đang tải dữ liệu...
           </div>
         )}
@@ -419,33 +425,41 @@ Parker cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
       />
 
       {/* 3. BOTTOM TAB BAR (iOS STYLE) */}
-      <nav className="bottom-nav">
+      <nav className="bottom-nav fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-[#151f32]/90 backdrop-blur-[15px] border-t border-border flex justify-around pt-2.5 pb-[calc(8px+var(--safe-area-bottom))] z-50">
         <button
-          className={`nav-item ${activeTab === "home" ? "active" : ""}`}
+          className={`flex flex-col items-center gap-1 bg-transparent border-0 text-[11px] font-medium cursor-pointer flex-1 ${
+            activeTab === "home" ? "text-indigo-500" : "text-slate-400 hover:text-slate-200"
+          }`}
           onClick={() => setActiveTab("home")}
         >
-          <Home className="nav-icon" />
+          <Home className="w-[22px] h-[22px]" />
           Tổng quan
         </button>
         <button
-          className={`nav-item ${activeTab === "rooms" ? "active" : ""}`}
+          className={`flex flex-col items-center gap-1 bg-transparent border-0 text-[11px] font-medium cursor-pointer flex-1 ${
+            activeTab === "rooms" ? "text-indigo-500" : "text-slate-400 hover:text-slate-200"
+          }`}
           onClick={() => setActiveTab("rooms")}
         >
-          <Layers className="nav-icon" />
+          <Layers className="w-[22px] h-[22px]" />
           Phòng trọ
         </button>
         <button
-          className={`nav-item ${activeTab === "billing" ? "active" : ""}`}
+          className={`flex flex-col items-center gap-1 bg-transparent border-0 text-[11px] font-medium cursor-pointer flex-1 ${
+            activeTab === "billing" ? "text-indigo-500" : "text-slate-400 hover:text-slate-200"
+          }`}
           onClick={() => setActiveTab("billing")}
         >
-          <FileText className="nav-icon" />
+          <FileText className="w-[22px] h-[22px]" />
           Ghi số điện
         </button>
         <button
-          className={`nav-item ${activeTab === "expenses" ? "active" : ""}`}
+          className={`flex flex-col items-center gap-1 bg-transparent border-0 text-[11px] font-medium cursor-pointer flex-1 ${
+            activeTab === "expenses" ? "text-indigo-500" : "text-slate-400 hover:text-slate-200"
+          }`}
           onClick={() => setActiveTab("expenses")}
         >
-          <Wrench className="nav-icon" />
+          <Wrench className="w-[22px] h-[22px]" />
           Chi phí
         </button>
       </nav>
