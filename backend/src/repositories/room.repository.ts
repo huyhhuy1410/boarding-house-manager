@@ -60,6 +60,7 @@ export class RoomRepository {
     rentStartDate?: Date;
     rentStartElectricity?: number;
     rentStartWater?: number;
+    billingDay?: number;
   }): Promise<Room> {
     return prisma.room.create({
       data: {
@@ -85,6 +86,7 @@ export class RoomRepository {
         rentStartDate: data.rentStartDate,
         rentStartElectricity: data.rentStartElectricity,
         rentStartWater: data.rentStartWater,
+        billingDay: data.billingDay,
       },
     });
   }

@@ -54,6 +54,7 @@ model Room {
   rentStartDate        DateTime?
   rentStartElectricity Float         @default(0)   // Chỉ số điện ban đầu lúc khách mới vào ở
   rentStartWater       Float         @default(0)   // Chỉ số nước ban đầu lúc khách mới vào ở
+  billingDay           Int           @default(30)  // Ngày chốt hóa đơn hàng tháng (1-31)
 
   // Quan hệ
   bills            Bill[]

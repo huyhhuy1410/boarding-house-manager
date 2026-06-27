@@ -44,6 +44,11 @@ export const createRoomSchema = z.object({
       .number()
       .nonnegative("Giá rác không được là số âm!")
       .optional(),
+    billingDay: z
+      .number()
+      .min(1, "Ngày chốt hóa đơn phải từ 1 đến 31!")
+      .max(31, "Ngày chốt hóa đơn phải từ 1 đến 31!")
+      .optional(),
   }),
 });
 

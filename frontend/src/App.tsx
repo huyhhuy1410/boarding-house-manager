@@ -44,6 +44,27 @@ export default function App() {
   const [selectedMonth] = useState<number>(6);
   const [selectedYear] = useState<number>(2026);
 
+  // Trạng thái cho CRUD Phòng trọ
+  const [showRoomModal, setShowRoomModal] = useState<boolean>(false);
+  const [editingRoom, setEditingRoom] = useState<Room | null>(null); // null: Thêm mới, object: Chỉnh sửa
+  const [roomFormName, setRoomFormName] = useState<string>("");
+  const [roomFormHouseId, setRoomFormHouseId] = useState<string>("");
+  const [roomFormPrice, setRoomFormPrice] = useState<string>("");
+  const [roomFormElecPrice, setRoomFormElecPrice] = useState<string>("3500");
+  const [roomFormWaterPrice, setRoomFormWaterPrice] = useState<string>("15000");
+  const [roomFormInternetPrice, setRoomFormInternetPrice] = useState<string>("100000");
+  const [roomFormTrashPrice, setRoomFormTrashPrice] = useState<string>("20000");
+  const [roomFormBillingDay, setRoomFormBillingDay] = useState<string>("30");
+  const [roomFormStatus, setRoomFormStatus] = useState<"VACANT" | "OCCUPIED" | "MAINTENANCE">("VACANT");
+  const [roomFormRenterName, setRoomFormRenterName] = useState<string>("");
+  const [roomFormRenterPhone, setRoomFormRenterPhone] = useState<string>("");
+  const [roomFormRenterDeposit, setRoomFormRenterDeposit] = useState<string>("0");
+  const [roomFormElecDeposit, setRoomFormElecDeposit] = useState<string>("0");
+  const [roomFormIsElecIncluded, setRoomFormIsElecIncluded] = useState<boolean>(false);
+  const [roomFormRentStart, setRoomFormRentStart] = useState<string>("");
+  const [roomFormStartElec, setRoomFormStartElec] = useState<string>("0");
+  const [roomFormStartWater, setRoomFormStartWater] = useState<string>("0");
+
   // Lưu trữ dữ liệu đang nhập ghi điện nước cho từng phòng
   const [billingInputs, setBillingInputs] = useState<
     Record<
@@ -231,6 +252,107 @@ export default function App() {
       await fetchRoomsAndBills();
     } catch (err: any) {
       alert("Lỗi khi xóa: " + (err.response?.data?.error || err.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOpenAddRoom = () => {
+    setEditingRoom(null);
+    setRoomFormName("");
+    setRoomFormHouseId(boardingHouses[0]?.id || "");
+    setRoomFormPrice("");
+    setRoomFormElecPrice("3500");
+    setRoomFormWaterPrice("15000");
+    setRoomFormInternetPrice("100000");
+    setRoomFormTrashPrice("20000");
+    setRoomFormBillingDay("30");
+    setRoomFormStatus("VACANT");
+    setRoomFormRenterName("");
+    setRoomFormRenterPhone("");
+    setRoomFormRenterDeposit("0");
+    setRoomFormElecDeposit("0");
+    setRoomFormIsElecIncluded(false);
+    setRoomFormRentStart("");
+    setRoomFormStartElec("0");
+    setRoomFormStartWater("0");
+    setShowRoomModal(true);
+  };
+
+  const handleOpenEditRoom = (room: Room) => {
+    setEditingRoom(room);
+    setRoomFormName(room.name);
+    setRoomFormHouseId(room.boardingHouseId);
+    setRoomFormPrice(room.price.toString());
+    setRoomFormElecPrice(room.electricityPrice.toString());
+    setRoomFormWaterPrice(room.waterPrice.toString());
+    setRoomFormInternetPrice(room.internetPrice.toString());
+    setRoomFormTrashPrice(room.trashPrice.toString());
+    setRoomFormBillingDay(room.billingDay?.toString() || "30");
+    setRoomFormStatus(room.status);
+    setRoomFormRenterName(room.renterName || "");
+    setRoomFormRenterPhone(room.renterPhone || "");
+    setRoomFormRenterDeposit(room.renterDeposit?.toString() || "0");
+    setRoomFormElecDeposit(room.electricityDeposit.toString());
+    setRoomFormIsElecIncluded(room.isElectricityIncluded);
+    setRoomFormRentStart(room.rentStartDate ? room.rentStartDate.substring(0, 10) : "");
+    setRoomFormStartElec(room.rentStartElectricity.toString());
+    setRoomFormStartWater(room.rentStartWater.toString());
+    setShowRoomModal(true);
+  };
+
+  const handleSaveRoom = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (!roomFormName.trim() || !roomFormPrice.trim() || !roomFormHouseId) {
+        alert("Vui lòng nhập đầy đủ tên phòng, giá thuê và chọn dãy trọ!");
+        return;
+      }
+      setLoading(true);
+
+      const roomPayload: any = {
+        name: roomFormName,
+        boardingHouseId: roomFormHouseId,
+        price: Number(roomFormPrice),
+        electricityPrice: Number(roomFormElecPrice),
+        waterPrice: Number(roomFormWaterPrice),
+        internetPrice: Number(roomFormInternetPrice),
+        trashPrice: Number(roomFormTrashPrice),
+        billingDay: Number(roomFormBillingDay),
+        status: roomFormStatus,
+        renterName: roomFormStatus === "OCCUPIED" ? roomFormRenterName || null : null,
+        renterPhone: roomFormStatus === "OCCUPIED" ? roomFormRenterPhone || null : null,
+        renterDeposit: roomFormStatus === "OCCUPIED" ? Number(roomFormRenterDeposit) : 0,
+        electricityDeposit: roomFormStatus === "OCCUPIED" ? Number(roomFormElecDeposit) : 0,
+        isElectricityIncluded: roomFormStatus === "OCCUPIED" ? roomFormIsElecIncluded : false,
+        rentStartDate: roomFormStatus === "OCCUPIED" && roomFormRentStart ? new Date(roomFormRentStart).toISOString() : null,
+        rentStartElectricity: roomFormStatus === "OCCUPIED" ? Number(roomFormStartElec) : 0,
+        rentStartWater: roomFormStatus === "OCCUPIED" ? Number(roomFormStartWater) : 0,
+      };
+
+      if (editingRoom) {
+        await roomService.update(editingRoom.id, roomPayload);
+      } else {
+        await roomService.create(roomPayload);
+      }
+
+      setShowRoomModal(false);
+      await fetchRoomsAndBills();
+    } catch (err: any) {
+      alert("Lỗi khi lưu phòng: " + (err.response?.data?.error || err.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteRoom = async (id: string) => {
+    if (!confirm("Bạn có chắc chắn muốn xóa phòng trọ này? Tất cả hóa đơn liên quan cũng sẽ bị xóa vĩnh viễn!")) return;
+    try {
+      setLoading(true);
+      await roomService.delete(id);
+      await fetchRoomsAndBills();
+    } catch (err: any) {
+      alert("Lỗi khi xóa phòng: " + (err.response?.data?.error || err.message));
     } finally {
       setLoading(false);
     }
@@ -580,6 +702,17 @@ export default function App() {
             ))}
           </div>
 
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "4px" }}>
+            <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>Danh sách phòng trọ</span>
+            <button
+              className="btn-primary"
+              style={{ width: "auto", padding: "6px 12px", borderRadius: "8px", fontSize: "0.75rem", display: "flex", alignItems: "center", gap: "4px" }}
+              onClick={handleOpenAddRoom}
+            >
+              <Plus size={14} /> Thêm phòng
+            </button>
+          </div>
+
           <div className="room-grid">
             {filteredRooms.map((room) => {
               const isNewRenter = room.status === "OCCUPIED" && (() => {
@@ -589,7 +722,7 @@ export default function App() {
               })();
 
               return (
-                <div key={room.id} className="room-card">
+                <div key={room.id} className="room-card" onClick={() => handleOpenEditRoom(room)} style={{ cursor: "pointer" }}>
                   <div className="room-header">
                     <span className="room-name">{room.name}</span>
                     <span className={`room-badge ${room.status.toLowerCase()}`}>
@@ -716,9 +849,28 @@ export default function App() {
           }}
         >
           <h3 style={{ fontSize: "1.2rem" }}>Chỉ số điện nước tháng này</h3>
-          <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>
+          <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "4px" }}>
             Nhập nhanh chỉ số điện nước cuối tháng để tạo hóa đơn gửi khách.
           </p>
+
+          {/* Bộ lọc Dãy trọ cho tab Ghi số điện (Billing) */}
+          <div className="tabs-container" style={{ marginBottom: "4px" }}>
+            <button
+              className={`tab-btn ${roomFilter === "ALL" ? "active" : ""}`}
+              onClick={() => setRoomFilter("ALL")}
+            >
+              Tất cả
+            </button>
+            {boardingHouses.map((house) => (
+              <button
+                key={house.id}
+                className={`tab-btn ${roomFilter === house.id ? "active" : ""}`}
+                onClick={() => setRoomFilter(house.id)}
+              >
+                {house.name}
+              </button>
+            ))}
+          </div>
 
           <div
             style={{
@@ -729,7 +881,7 @@ export default function App() {
             }}
           >
             {rooms
-              .filter((r) => r.status === "OCCUPIED")
+              .filter((r) => r.status === "OCCUPIED" && (roomFilter === "ALL" || r.boardingHouseId === roomFilter))
               .map((room) => {
                 const bill = bills.find((b) => b.roomId === room.id);
 
@@ -814,6 +966,19 @@ export default function App() {
                             Bao Điện
                           </span>
                         )}
+                        <span
+                          style={{
+                            fontSize: "0.65rem",
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            backgroundColor: new Date().getDate() === room.billingDay ? "var(--warning-glow)" : "transparent",
+                            color: new Date().getDate() === room.billingDay ? "var(--warning)" : "var(--text-muted)",
+                            fontWeight: new Date().getDate() === room.billingDay ? "bold" : "normal",
+                            border: `1px solid ${new Date().getDate() === room.billingDay ? "var(--warning)" : "var(--border-color)"}`,
+                          }}
+                        >
+                          {new Date().getDate() === room.billingDay ? "Đến hạn (Ngày " + room.billingDay + ")" : "Hạn: Ngày " + room.billingDay}
+                        </span>
                       </span>
                       <span
                         style={{
@@ -1414,6 +1579,176 @@ export default function App() {
           Chi phí
         </button>
       </nav>
+
+      {/* MODAL THÊM / SỬA PHÒNG TRỌ */}
+      {showRoomModal && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundColor: "rgba(0, 0, 0, 0.7)",
+          backdropFilter: "blur(4px)",
+          WebkitBackdropFilter: "blur(4px)",
+          zIndex: 2000,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "16px",
+        }}>
+          <form onSubmit={handleSaveRoom} style={{
+            backgroundColor: "var(--surface-color)",
+            border: "1px solid var(--border-color)",
+            borderRadius: "20px",
+            width: "100%",
+            maxWidth: "420px",
+            maxHeight: "90vh",
+            overflowY: "auto",
+            padding: "20px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "14px",
+            boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.4)",
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border-color)", paddingBottom: "10px" }}>
+              <h3 style={{ fontSize: "1.1rem", fontWeight: "bold" }}>
+                {editingRoom ? `Chỉnh sửa: ${editingRoom.name}` : "Thêm Phòng Trọ Mới"}
+              </h3>
+              <button type="button" onClick={() => setShowRoomModal(false)} style={{ backgroundColor: "transparent", border: "none", color: "var(--text-muted)", fontSize: "1.2rem", cursor: "pointer" }}>×</button>
+            </div>
+
+            {/* Thông tin cơ bản */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              <h4 style={{ fontSize: "0.8rem", color: "var(--primary-color)", textTransform: "uppercase", fontWeight: "bold", borderLeft: "2px solid var(--primary-color)", paddingLeft: "6px" }}>Thông tin cơ bản</h4>
+              
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                <div>
+                  <label style={{ fontSize: "0.72rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Tên phòng</label>
+                  <input type="text" placeholder="Ví dụ: A1" value={roomFormName} onChange={(e) => setRoomFormName(e.target.value)} style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.85rem" }} />
+                </div>
+                <div>
+                  <label style={{ fontSize: "0.72rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Thuộc dãy trọ</label>
+                  <select value={roomFormHouseId} onChange={(e) => setRoomFormHouseId(e.target.value)} style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.85rem" }}>
+                    <option value="" disabled>-- Chọn dãy --</option>
+                    {boardingHouses.map((house) => (
+                      <option key={house.id} value={house.id}>{house.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                <div>
+                  <label style={{ fontSize: "0.72rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Giá thuê phòng (đ)</label>
+                  <input type="number" placeholder="Ví dụ: 3000000" value={roomFormPrice} onChange={(e) => setRoomFormPrice(e.target.value)} style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.85rem" }} />
+                </div>
+                <div>
+                  <label style={{ fontSize: "0.72rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Ngày chốt hóa đơn (1-31)</label>
+                  <input type="number" min="1" max="31" placeholder="Mặc định: 30" value={roomFormBillingDay} onChange={(e) => setRoomFormBillingDay(e.target.value)} style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.85rem" }} />
+                </div>
+              </div>
+            </div>
+
+            {/* Đơn giá dịch vụ */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              <h4 style={{ fontSize: "0.8rem", color: "var(--primary-color)", textTransform: "uppercase", fontWeight: "bold", borderLeft: "2px solid var(--primary-color)", paddingLeft: "6px" }}>Đơn giá dịch vụ</h4>
+              
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                <div>
+                  <label style={{ fontSize: "0.72rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Đơn giá điện (đ/kWh)</label>
+                  <input type="number" placeholder="3500" value={roomFormElecPrice} onChange={(e) => setRoomFormElecPrice(e.target.value)} style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.85rem" }} />
+                </div>
+                <div>
+                  <label style={{ fontSize: "0.72rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Đơn giá nước (đ/m3)</label>
+                  <input type="number" placeholder="15000" value={roomFormWaterPrice} onChange={(e) => setRoomFormWaterPrice(e.target.value)} style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.85rem" }} />
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                <div>
+                  <label style={{ fontSize: "0.72rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Internet/phòng (đ)</label>
+                  <input type="number" placeholder="100000" value={roomFormInternetPrice} onChange={(e) => setRoomFormInternetPrice(e.target.value)} style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.85rem" }} />
+                </div>
+                <div>
+                  <label style={{ fontSize: "0.72rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Rác thải/phòng (đ)</label>
+                  <input type="number" placeholder="20000" value={roomFormTrashPrice} onChange={(e) => setRoomFormTrashPrice(e.target.value)} style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.85rem" }} />
+                </div>
+              </div>
+            </div>
+
+            {/* Trạng thái & Khách thuê */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              <h4 style={{ fontSize: "0.8rem", color: "var(--primary-color)", textTransform: "uppercase", fontWeight: "bold", borderLeft: "2px solid var(--primary-color)", paddingLeft: "6px" }}>Trạng thái & Khách thuê</h4>
+              
+              <div>
+                <label style={{ fontSize: "0.72rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Trạng thái phòng</label>
+                <select value={roomFormStatus} onChange={(e) => setRoomFormStatus(e.target.value as any)} style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-color)", color: "var(--text-primary)", fontSize: "0.85rem" }}>
+                  <option value="VACANT">Phòng trống</option>
+                  <option value="OCCUPIED">Đang thuê</option>
+                  <option value="MAINTENANCE">Bảo trì</option>
+                </select>
+              </div>
+
+              {roomFormStatus === "OCCUPIED" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "12px", borderRadius: "10px", backgroundColor: "var(--bg-color)", border: "1px dashed var(--border-color)" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                    <div>
+                      <label style={{ fontSize: "0.7rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Tên khách thuê</label>
+                      <input type="text" placeholder="Nguyễn Văn A" value={roomFormRenterName} onChange={(e) => setRoomFormRenterName(e.target.value)} style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid var(--border-color)", backgroundColor: "var(--surface-color)", color: "var(--text-primary)", fontSize: "0.8rem" }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: "0.7rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Số điện thoại</label>
+                      <input type="text" placeholder="090..." value={roomFormRenterPhone} onChange={(e) => setRoomFormRenterPhone(e.target.value)} style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid var(--border-color)", backgroundColor: "var(--surface-color)", color: "var(--text-primary)", fontSize: "0.8rem" }} />
+                    </div>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                    <div>
+                      <label style={{ fontSize: "0.7rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Cọc phòng (đ)</label>
+                      <input type="number" value={roomFormRenterDeposit} onChange={(e) => setRoomFormRenterDeposit(e.target.value)} style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid var(--border-color)", backgroundColor: "var(--surface-color)", color: "var(--text-primary)", fontSize: "0.8rem" }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: "0.7rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Cọc điện gối đầu (đ)</label>
+                      <input type="number" value={roomFormElecDeposit} onChange={(e) => setRoomFormElecDeposit(e.target.value)} style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid var(--border-color)", backgroundColor: "var(--surface-color)", color: "var(--text-primary)", fontSize: "0.8rem" }} />
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", margin: "4px 0" }}>
+                    <input type="checkbox" id="isElecInc" checked={roomFormIsElecIncluded} onChange={(e) => setRoomFormIsElecIncluded(e.target.checked)} />
+                    <label htmlFor="isElecInc" style={{ fontSize: "0.72rem", color: "var(--text-secondary)", cursor: "pointer" }}>Bao tiền điện (áp dụng cho 3 Trời)</label>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: "0.7rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Ngày bắt đầu thuê</label>
+                    <input type="date" value={roomFormRentStart} onChange={(e) => setRoomFormRentStart(e.target.value)} style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid var(--border-color)", backgroundColor: "var(--surface-color)", color: "var(--text-primary)", fontSize: "0.8rem" }} />
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                    <div>
+                      <label style={{ fontSize: "0.7rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Số điện ban đầu</label>
+                      <input type="number" value={roomFormStartElec} onChange={(e) => setRoomFormStartElec(e.target.value)} style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid var(--border-color)", backgroundColor: "var(--surface-color)", color: "var(--text-primary)", fontSize: "0.8rem" }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: "0.7rem", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Số nước ban đầu</label>
+                      <input type="number" value={roomFormStartWater} onChange={(e) => setRoomFormStartWater(e.target.value)} style={{ width: "100%", padding: "6px 8px", borderRadius: "6px", border: "1px solid var(--border-color)", backgroundColor: "var(--surface-color)", color: "var(--text-primary)", fontSize: "0.8rem" }} />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Buttons điều hướng */}
+            <div style={{ display: "flex", gap: "10px", marginTop: "12px", borderTop: "1px solid var(--border-color)", paddingTop: "14px" }}>
+              {editingRoom && (
+                <button type="button" onClick={() => handleDeleteRoom(editingRoom.id)} style={{ padding: "10px", borderRadius: "10px", border: "none", backgroundColor: "var(--danger-glow)", color: "var(--danger)", fontSize: "0.82rem", fontWeight: "bold", cursor: "pointer" }}>Xóa</button>
+              )}
+              <button type="button" onClick={() => setShowRoomModal(false)} className="btn-secondary" style={{ flex: 1, padding: "10px", fontSize: "0.82rem", backgroundColor: "transparent", color: "var(--text-secondary)", border: "1px solid var(--border-color)", borderRadius: "10px" }}>Hủy</button>
+              <button type="submit" className="btn-primary" style={{ flex: 2, padding: "10px", fontSize: "0.82rem" }}>Lưu lại</button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

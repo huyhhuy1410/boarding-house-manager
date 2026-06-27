@@ -42,6 +42,7 @@ export class RoomService {
     rentStartDate?: Date;
     rentStartElectricity?: number;
     rentStartWater?: number;
+    billingDay?: number;
   }): Promise<Room> {
     const room = await this.roomRepository.findByName(data.name);
     if (room) {

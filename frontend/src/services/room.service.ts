@@ -25,6 +25,7 @@ export interface Room {
   rentStartDate: string | null;
   rentStartElectricity: number;
   rentStartWater: number;
+  billingDay: number;
   isPaidThisMonth?: boolean; // Thuộc tính giả lập ở frontend để tính toán trạng thái đóng tiền
   bills?: any[];
 }
