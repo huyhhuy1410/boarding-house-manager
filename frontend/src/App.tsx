@@ -80,10 +80,10 @@ export default function App() {
   const [expenseRoomId, setExpenseRoomId] = useState<string>("chung");
   const [expenseDesc, setExpenseDesc] = useState<string>("");
 
-  // Hàm load dữ liệu từ API
-  const fetchRoomsAndBills = async () => {
+  // Hàm load dữ liệu từ API (Hỗ trợ tham số silent để chạy ngầm không hiện loading)
+  const fetchRoomsAndBills = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const [roomsData, bhData] = await Promise.all([
         roomService.getAll(),
         boardingHouseService.getAll(),
@@ -94,8 +94,6 @@ export default function App() {
         selectedYear,
       );
       setBills(billsData);
-
-
 
       // Map thuộc tính isPaidThisMonth cho các phòng dựa vào hóa đơn đã được lập
       const mappedRooms = roomsData.map((room) => {
@@ -117,7 +115,7 @@ export default function App() {
     } catch (err) {
       setError("Không thể kết nối đến máy chủ API. Vui lòng kiểm tra lại!");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -133,7 +131,7 @@ export default function App() {
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        fetchRoomsAndBills();
+        fetchRoomsAndBills(true); // Silent refetch ngầm
       }
     };
 
@@ -151,7 +149,7 @@ export default function App() {
     if (!isAuthenticated) return;
 
     const interval = setInterval(() => {
-      fetchRoomsAndBills();
+      fetchRoomsAndBills(true);
     }, 20000);
 
     return () => clearInterval(interval);
@@ -576,7 +574,9 @@ Xin cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
           <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-slate-950/40 backdrop-blur-[2px]">
             <div className="flex flex-col items-center gap-3 rounded-2xl border border-slate-800/80 bg-slate-900/90 p-6 shadow-2xl">
               <div className="size-10 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent"></div>
-              <span className="text-[13px] font-bold text-slate-200">Đang xử lý...</span>
+              <span className="text-[13px] font-bold text-slate-200">
+                Đang xử lý...
+              </span>
             </div>
           </div>
         )}

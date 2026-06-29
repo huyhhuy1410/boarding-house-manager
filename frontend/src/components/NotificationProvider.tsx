@@ -21,43 +21,57 @@ interface NotificationContextProps {
   showConfirm: (message: string, onConfirm: () => void, title?: string) => void;
 }
 
-const NotificationContext = createContext<NotificationContextProps | undefined>(undefined);
+const NotificationContext = createContext<NotificationContextProps | undefined>(
+  undefined,
+);
 
 // Hook tiện ích để các component con dễ dàng sử dụng
 export const useNotification = () => {
   const context = useContext(NotificationContext);
   if (!context) {
-    throw new Error("useNotification phải được sử dụng bên trong NotificationProvider!");
+    throw new Error(
+      "useNotification phải được sử dụng bên trong NotificationProvider!",
+    );
   }
   return context;
 };
 
-export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const [confirmConfig, setConfirmConfig] = useState<ConfirmConfig | null>(null);
+  const [confirmConfig, setConfirmConfig] = useState<ConfirmConfig | null>(
+    null,
+  );
 
   // Hàm kích hoạt hiển thị Toast
-  const showToast = useCallback((message: string, type: ToastType = "success") => {
-    const id = Math.random().toString(36).substring(2, 9);
-    setToasts((prev) => [...prev, { id, message, type }]);
+  const showToast = useCallback(
+    (message: string, type: ToastType = "success") => {
+      const id = Math.random().toString(36).substring(2, 9);
+      setToasts((prev) => [...prev, { id, message, type }]);
 
-    // Tự động xóa toast sau 3.5 giây
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 3500);
-  }, []);
+      // Tự động xóa toast sau 3.5 giây
+      setTimeout(() => {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+      }, 3500);
+    },
+    [],
+  );
 
   // Hàm kích hoạt hiển thị Dialog Xác nhận
-  const showConfirm = useCallback((message: string, onConfirm: () => void, title: string = "Xác nhận") => {
-    setConfirmConfig({
-      title,
-      message,
-      onConfirm: () => {
-        onConfirm();
-        setConfirmConfig(null);
-      },
-    });
-  }, []);
+  const showConfirm = useCallback(
+    (message: string, onConfirm: () => void, title: string = "Xác nhận") => {
+      setConfirmConfig({
+        title,
+        message,
+        onConfirm: () => {
+          onConfirm();
+          setConfirmConfig(null);
+        },
+      });
+    },
+    [],
+  );
 
   const handleCancelConfirm = () => {
     setConfirmConfig(null);
@@ -68,7 +82,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       {children}
 
       {/* 2. HIỂN THỊ DANH SÁCH TOASTS (Giao diện iOS-style floating Toast) */}
-      <div className="pointer-events-none fixed left-1/2 top-4 z-[9999] flex w-full max-w-[380px] -translate-x-1/2 flex-col gap-2.5 px-4">
+      <div className="max-w- [380px] pointer-events-none fixed left-1/2 top-4 z-[9999] flex w-full -translate-x-1/2 flex-col gap-2.5 px-4">
         {toasts.map((toast) => (
           <div
             key={toast.id}
@@ -76,20 +90,26 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
               toast.type === "success"
                 ? "border-[#10b981]/30 bg-[#10b981]/10 text-[#10b981]"
                 : toast.type === "error"
-                ? "border-[#ef4444]/30 bg-[#ef4444]/10 text-[#ef4444]"
-                : "border-indigo-500/30 bg-indigo-600/10 text-indigo-400"
+                  ? "border-[#ef4444]/30 bg-[#ef4444]/10 text-[#ef4444]"
+                  : "border-indigo-500/30 bg-indigo-600/10 text-indigo-400"
             }`}
           >
             <div className="flex items-center gap-2.5">
-              {toast.type === "success" && <CheckCircle2 className="size-5 shrink-0" />}
-              {toast.type === "error" && <AlertCircle className="size-5 shrink-0" />}
+              {toast.type === "success" && (
+                <CheckCircle2 className="size-5 shrink-0" />
+              )}
+              {toast.type === "error" && (
+                <AlertCircle className="size-5 shrink-0" />
+              )}
               {toast.type === "info" && <Info className="size-5 shrink-0" />}
               <span className="text-[13px] font-medium leading-relaxed text-slate-100">
                 {toast.message}
               </span>
             </div>
             <button
-              onClick={() => setToasts((prev) => prev.filter((t) => t.id !== toast.id))}
+              onClick={() =>
+                setToasts((prev) => prev.filter((t) => t.id !== toast.id))
+              }
               className="ml-2.5 flex cursor-pointer items-center justify-center border-0 bg-transparent p-0.5 text-slate-400 hover:text-slate-200"
             >
               <X className="size-[14px]" />
@@ -108,7 +128,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             <h3 className="mb-1.5 mt-1 text-[16px] font-bold text-slate-100">
               {confirmConfig.title}
             </h3>
-            
+
             <p className="mb-5 text-[13px] leading-normal text-slate-400">
               {confirmConfig.message}
             </p>
