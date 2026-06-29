@@ -17,12 +17,13 @@ import {
   Bar,
   Cell,
 } from "recharts";
-import { Room } from "../services/room.service";
+import { Room, BoardingHouse } from "../services/room.service";
 import { Expense, FinancialSummary } from "../services/expense.service";
 
 interface HomeTabProps {
   rooms: Room[];
   expenses: Expense[];
+  boardingHouses: BoardingHouse[]; // Thêm dòng này
   chartData: FinancialSummary[];
   selectedMonth: number;
   selectedYear: number;
@@ -33,6 +34,7 @@ interface HomeTabProps {
 export const HomeTab: React.FC<HomeTabProps> = ({
   rooms,
   expenses,
+  boardingHouses, // Thêm dòng này
   chartData,
   selectedMonth,
   selectedYear,
@@ -227,7 +229,23 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     {exp.title}
                   </div>
                   <div className="mt-0.5 text-[11.5px] text-slate-400">
-                    Phạm vi: {exp.room?.name || "Chung"} • {new Date(exp.date).toLocaleDateString("vi-VN")}
+                    Phạm vi:{" "}
+                    <strong className="text-slate-300">
+                      {(() => {
+                        if (exp.roomId) {
+                          const roomObj = rooms.find((r) => r.id === exp.roomId);
+                          const bhName = boardingHouses.find((h) => h.id === roomObj?.boardingHouseId)?.name || "";
+                          const roomName = roomObj?.name || "";
+                          return bhName ? `${bhName} / Phòng ${roomName}` : `Phòng ${roomName}`;
+                        }
+                        if (exp.description && exp.description.startsWith("Dãy trọ: ")) {
+                          const match = exp.description.match(/^Dãy trọ: ([^-\n]+)/);
+                          if (match) return `Dãy ${match[1].trim()}`;
+                        }
+                        return "Chung";
+                      })()}
+                    </strong>{" "}
+                    • {new Date(exp.date).toLocaleDateString("vi-VN")}
                   </div>
                 </div>
                 <div className="ml-3 shrink-0 text-[14px] font-bold text-amber-500">

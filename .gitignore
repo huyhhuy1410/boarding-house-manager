@@ -59,3 +59,10 @@ proposal_quan_ly_nha_tro.md
 README-local.md
 docs/
 AGENTS.md
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

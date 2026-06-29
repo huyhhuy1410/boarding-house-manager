@@ -5,7 +5,7 @@ import { BoardingHouse } from "../services/room.service";
 import { Bill } from "../services/bill.service";
 import { BillImageCard } from "./BillImageCard";
 import { formatNumberString } from "./RoomModal";
-
+import { useNotification } from "./NotificationProvider";
 interface BillingInputState {
   newElectricity: string;
   newWater: string;
@@ -22,8 +22,14 @@ interface BillingTabProps {
   selectedMonth: number;
   selectedYear: number;
   billingInputs: Record<string, BillingInputState>;
-  setBillingInputs: React.Dispatch<React.SetStateAction<Record<string, BillingInputState>>>;
-  onCreateBill: (roomId: string, oldElectricity: number, oldWater: number) => Promise<void>;
+  setBillingInputs: React.Dispatch<
+    React.SetStateAction<Record<string, BillingInputState>>
+  >;
+  onCreateBill: (
+    roomId: string,
+    oldElectricity: number,
+    oldWater: number,
+  ) => Promise<void>;
   onPayBill: (billId: string) => Promise<void>;
   onDeleteBill: (billId: string) => Promise<void>;
   onCopyZalo: (bill: Bill, roomName: string, renterName: string | null) => void;
@@ -48,10 +54,16 @@ export const BillingTab: React.FC<BillingTabProps> = ({
   formatCurrency,
   loading,
 }) => {
-  const activeRooms = rooms.filter((r) => r.status === "OCCUPIED" && (roomFilter === "ALL" || r.boardingHouseId === roomFilter));
+  const { showConfirm } = useNotification();
+  const activeRooms = rooms.filter(
+    (r) =>
+      r.status === "OCCUPIED" &&
+      (roomFilter === "ALL" || r.boardingHouseId === roomFilter),
+  );
 
   const handleInputChange = (roomId: string, field: string, value: string) => {
-    const formattedValue = field === "extraAmount" ? formatNumberString(value) : value;
+    const formattedValue =
+      field === "extraAmount" ? formatNumberString(value) : value;
     setBillingInputs((prev: Record<string, BillingInputState>) => ({
       ...prev,
       [roomId]: {
@@ -67,7 +79,11 @@ export const BillingTab: React.FC<BillingTabProps> = ({
   };
 
   // Hàm wrapper xử lý tạo hóa đơn và tự động nhảy sang phòng tiếp theo chưa ghi số
-  const handleSubmitBill = async (roomId: string, oldElectricity: number, oldWater: number) => {
+  const handleSubmitBill = async (
+    roomId: string,
+    oldElectricity: number,
+    oldWater: number,
+  ) => {
     try {
       // 1. Lưu hóa đơn phòng hiện tại
       await onCreateBill(roomId, oldElectricity, oldWater);
@@ -90,7 +106,9 @@ export const BillingTab: React.FC<BillingTabProps> = ({
           // 3. Cuộn mượt mà đến phòng kế tiếp và chọn ô input điện mới
           if (nextRoom) {
             const cardEl = document.getElementById(`room-card-${nextRoom.id}`);
-            const inputEl = document.getElementById(`elec-input-${nextRoom.id}`) as HTMLInputElement | null;
+            const inputEl = document.getElementById(
+              `elec-input-${nextRoom.id}`,
+            ) as HTMLInputElement | null;
 
             if (cardEl) {
               cardEl.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -113,7 +131,9 @@ export const BillingTab: React.FC<BillingTabProps> = ({
   return (
     <section className="flex flex-col gap-4">
       <div>
-        <h3 className="text-[17px] font-bold text-slate-100">Chỉ số điện nước tháng này</h3>
+        <h3 className="text-[17px] font-bold text-slate-100">
+          Chỉ số điện nước tháng này
+        </h3>
         <p className="mt-1 text-[12.5px] text-slate-500">
           Nhập nhanh chỉ số điện nước cuối tháng để tạo hóa đơn gửi khách.
         </p>
@@ -123,7 +143,9 @@ export const BillingTab: React.FC<BillingTabProps> = ({
       <div className="tabs-container flex gap-1 overflow-x-auto rounded-xl border border-border bg-surface p-1">
         <button
           className={`active-scale flex-1 whitespace-nowrap rounded-lg px-3.5 py-2 text-[13px] font-medium transition-all ${
-            roomFilter === "ALL" ? "bg-indigo-600 text-white shadow-md" : "text-slate-400 hover:text-slate-200"
+            roomFilter === "ALL"
+              ? "bg-indigo-600 text-white shadow-md"
+              : "text-slate-400 hover:text-slate-200"
           }`}
           onClick={() => setRoomFilter("ALL")}
         >
@@ -133,7 +155,9 @@ export const BillingTab: React.FC<BillingTabProps> = ({
           <button
             key={house.id}
             className={`active-scale flex-1 whitespace-nowrap rounded-lg px-3.5 py-2 text-[13px] font-medium transition-all ${
-              roomFilter === house.id ? "bg-indigo-600 text-white shadow-md" : "text-slate-400 hover:text-slate-200"
+              roomFilter === house.id
+                ? "bg-indigo-600 text-white shadow-md"
+                : "text-slate-400 hover:text-slate-200"
             }`}
             onClick={() => setRoomFilter(house.id)}
           >
@@ -178,7 +202,10 @@ export const BillingTab: React.FC<BillingTabProps> = ({
             const isNewRenter = (() => {
               if (!room.rentStartDate) return false;
               const d = new Date(room.rentStartDate);
-              return d.getMonth() + 1 === selectedMonth && d.getFullYear() === selectedYear;
+              return (
+                d.getMonth() + 1 === selectedMonth &&
+                d.getFullYear() === selectedYear
+              );
             })();
 
             // Xác định chỉ số điện cũ & nước cũ
@@ -188,7 +215,10 @@ export const BillingTab: React.FC<BillingTabProps> = ({
             if (!isNewRenter && room.bills && room.bills.length > 0) {
               // Tìm hóa đơn của các tháng trước tháng hiện tại
               const pastBills = room.bills.filter((b) => {
-                return b.year < selectedYear || (b.year === selectedYear && b.month < selectedMonth);
+                return (
+                  b.year < selectedYear ||
+                  (b.year === selectedYear && b.month < selectedMonth)
+                );
               });
               if (pastBills.length > 0) {
                 const latestPastBill = pastBills[0]; // Vì đã được orderBy desc ở backend
@@ -230,7 +260,9 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                           : "border-slate-700/60 bg-slate-800/40 text-slate-400"
                       }`}
                     >
-                      {new Date().getDate() === room.billingDay ? `Đến hạn (Ngày ${room.billingDay})` : `Hạn: Ngày ${room.billingDay}`}
+                      {new Date().getDate() === room.billingDay
+                        ? `Đến hạn (Ngày ${room.billingDay})`
+                        : `Hạn: Ngày ${room.billingDay}`}
                     </span>
                   </span>
                   <span className="shrink-0 pt-0.5 text-[12px] text-slate-500">
@@ -242,8 +274,14 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                   /* ĐÃ CÓ HÓA ĐƠN TRONG THÁNG NÀY */
                   <div className="flex flex-col gap-2.5 text-[13px]">
                     <div className="grid grid-cols-2 gap-1.5 text-slate-400">
-                      <div>Điện: {bill.oldElectricity} kWh ➔ {bill.newElectricity} kWh ({bill.newElectricity - bill.oldElectricity} kWh)</div>
-                      <div>Nước: {bill.oldWater} m3 ➔ {bill.newWater} m3 ({bill.newWater - bill.oldWater} m3)</div>
+                      <div>
+                        Điện: {bill.oldElectricity} kWh ➔ {bill.newElectricity}{" "}
+                        kWh ({bill.newElectricity - bill.oldElectricity} kWh)
+                      </div>
+                      <div>
+                        Nước: {bill.oldWater} m3 ➔ {bill.newWater} m3 (
+                        {bill.newWater - bill.oldWater} m3)
+                      </div>
                     </div>
 
                     <div className="flex flex-col gap-1.5 rounded-lg border border-border bg-bg p-3 text-slate-300">
@@ -262,12 +300,20 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                       {(bill.internetAmount > 0 || bill.trashAmount > 0) && (
                         <div className="flex justify-between">
                           <span>Dịch vụ cố định (Internet + Rác):</span>
-                          <span>{formatCurrency(Number(bill.internetAmount) + Number(bill.trashAmount))}</span>
+                          <span>
+                            {formatCurrency(
+                              Number(bill.internetAmount) +
+                                Number(bill.trashAmount),
+                            )}
+                          </span>
                         </div>
                       )}
                       {Number(bill.extraAmount) > 0 && (
                         <div className="flex justify-between text-amber-500">
-                          <span>Phát sinh ({bill.extraDescription || "Sửa thiết bị"}):</span>
+                          <span>
+                            Phát sinh ({bill.extraDescription || "Sửa thiết bị"}
+                            ):
+                          </span>
                           <span>+{formatCurrency(bill.extraAmount)}</span>
                         </div>
                       )}
@@ -294,11 +340,13 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                       <div className="flex flex-wrap justify-end gap-2 border-t border-slate-800/60 pt-1">
                         <button
                           className="active-scale flex w-auto items-center gap-1 rounded-lg border border-border bg-[#1e2d4a]/50 px-3 py-1.5 text-[11.5px] font-bold text-slate-300 transition-all hover:bg-surface-hover"
-                          onClick={() => onCopyZalo(bill, room.name, room.renterName)}
+                          onClick={() =>
+                            onCopyZalo(bill, room.name, room.renterName)
+                          }
                         >
                           <Copy size={12} /> Zalo
                         </button>
-                        
+
                         <BillImageCard
                           bill={bill}
                           roomName={room.name}
@@ -312,18 +360,25 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                               disabled={loading}
                               className="active-scale flex w-auto items-center gap-1 rounded-lg border border-red-900/60 bg-red-950/20 px-3 py-1.5 text-[11.5px] font-bold text-red-400 transition-all hover:bg-surface-hover"
                               onClick={() => {
-                                if (window.confirm("Bạn có chắc chắn muốn hủy chốt hóa đơn của phòng này để nhập lại chỉ số không?")) {
-                                  setBillingInputs((prev) => ({
-                                    ...prev,
-                                    [room.id]: {
-                                      newElectricity: bill.newElectricity.toString(),
-                                      newWater: bill.newWater.toString(),
-                                      extraAmount: formatNumberString(bill.extraAmount.toString()),
-                                      extraDescription: bill.extraDescription || "",
-                                    },
-                                  }));
-                                  onDeleteBill(bill.id);
-                                }
+                                showConfirm(
+                                  "Bạn có chắc chắn muốn hủy chốt hóa đơn của phòng này để nhập lại chỉ số không?",
+                                  () => {
+                                    setBillingInputs((prev) => ({
+                                      ...prev,
+                                      [room.id]: {
+                                        newElectricity:
+                                          bill.newElectricity.toString(),
+                                        newWater: bill.newWater.toString(),
+                                        extraAmount: formatNumberString(
+                                          bill.extraAmount.toString(),
+                                        ),
+                                        extraDescription:
+                                          bill.extraDescription || "",
+                                      },
+                                    }));
+                                    onDeleteBill(bill.id);
+                                  },
+                                );
                               }}
                             >
                               <RefreshCw size={12} /> Hủy chốt
@@ -333,9 +388,14 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                               disabled={loading}
                               className="active-scale w-auto rounded-lg bg-indigo-600 px-3.5 py-1.5 text-[11.5px] font-bold text-white transition-all hover:bg-indigo-700 disabled:opacity-50"
                               onClick={() => {
-                                if (window.confirm(`Xác nhận phòng ${room.name} đã đóng đủ số tiền ${formatCurrency(bill.totalAmount)}?`)) {
-                                  onPayBill(bill.id);
-                                }
+                                showConfirm(
+                                  `Xác nhận phòng ${room.name} đã đóng đủ số tiền ${formatCurrency(
+                                    bill.totalAmount,
+                                  )}?`,
+                                  () => {
+                                    onPayBill(bill.id);
+                                  },
+                                );
                               }}
                             >
                               {loading ? "Đang lưu..." : "Đã thu tiền"}
@@ -350,25 +410,41 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                   <div className="flex flex-col gap-2.5">
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="mb-1 block text-[11.5px] text-slate-400">Số Điện Mới (Cũ: {oldElectricity})</label>
+                        <label className="mb-1 block text-[11.5px] text-slate-400">
+                          Số Điện Mới (Cũ: {oldElectricity})
+                        </label>
                         <input
                           type="number"
                           id={`elec-input-${room.id}`}
                           disabled={loading}
                           placeholder="Nhập số điện..."
                           value={inputs.newElectricity}
-                          onChange={(e) => handleInputChange(room.id, "newElectricity", e.target.value)}
+                          onChange={(e) =>
+                            handleInputChange(
+                              room.id,
+                              "newElectricity",
+                              e.target.value,
+                            )
+                          }
                           className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
                         />
                       </div>
                       <div>
-                        <label className="mb-1 block text-[11.5px] text-slate-400">Số Nước Mới (Cũ: {oldWater})</label>
+                        <label className="mb-1 block text-[11.5px] text-slate-400">
+                          Số Nước Mới (Cũ: {oldWater})
+                        </label>
                         <input
                           type="number"
                           disabled={loading}
                           placeholder="Nhập số nước..."
                           value={inputs.newWater}
-                          onChange={(e) => handleInputChange(room.id, "newWater", e.target.value)}
+                          onChange={(e) =>
+                            handleInputChange(
+                              room.id,
+                              "newWater",
+                              e.target.value,
+                            )
+                          }
                           className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
                         />
                       </div>
@@ -376,24 +452,40 @@ export const BillingTab: React.FC<BillingTabProps> = ({
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="mb-1 block text-[11.5px] text-slate-400">Phát sinh riêng (đ)</label>
+                        <label className="mb-1 block text-[11.5px] text-slate-400">
+                          Phát sinh riêng (đ)
+                        </label>
                         <input
                           type="text"
                           disabled={loading}
                           placeholder="0"
                           value={inputs.extraAmount}
-                          onChange={(e) => handleInputChange(room.id, "extraAmount", e.target.value)}
+                          onChange={(e) =>
+                            handleInputChange(
+                              room.id,
+                              "extraAmount",
+                              e.target.value,
+                            )
+                          }
                           className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
                         />
                       </div>
                       <div>
-                        <label className="mb-1 block text-[11.5px] text-slate-400">Lý do phát sinh</label>
+                        <label className="mb-1 block text-[11.5px] text-slate-400">
+                          Lý do phát sinh
+                        </label>
                         <input
                           type="text"
                           disabled={loading}
                           placeholder="Ví dụ: Thay khóa..."
                           value={inputs.extraDescription}
-                          onChange={(e) => handleInputChange(room.id, "extraDescription", e.target.value)}
+                          onChange={(e) =>
+                            handleInputChange(
+                              room.id,
+                              "extraDescription",
+                              e.target.value,
+                            )
+                          }
                           className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
                         />
                       </div>
@@ -402,7 +494,9 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                     <button
                       disabled={loading}
                       className="active-scale mt-2 w-full rounded-lg bg-indigo-600 py-2.5 text-[13px] font-bold text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
-                      onClick={() => handleSubmitBill(room.id, oldElectricity, oldWater)}
+                      onClick={() =>
+                        handleSubmitBill(room.id, oldElectricity, oldWater)
+                      }
                     >
                       {loading ? "Đang tính..." : "Lưu & Tính tiền phòng"}
                     </button>

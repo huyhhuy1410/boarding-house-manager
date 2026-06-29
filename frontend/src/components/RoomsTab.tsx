@@ -15,6 +15,7 @@ interface RoomsTabProps {
   formatCurrency: (val: number) => string;
   loading?: boolean;
   onManageBHClick: () => void;
+  onAddBHClick: () => void; // Thêm prop này
 }
 
 export const RoomsTab: React.FC<RoomsTabProps> = ({
@@ -29,6 +30,7 @@ export const RoomsTab: React.FC<RoomsTabProps> = ({
   formatCurrency,
   loading = false,
   onManageBHClick,
+  onAddBHClick, // Thêm prop này
 }) => {
   const filteredRooms = rooms.filter((room) => {
     if (roomFilter === "ALL") return true;
@@ -37,13 +39,22 @@ export const RoomsTab: React.FC<RoomsTabProps> = ({
 
   return (
     <>
-      <button
-        onClick={onManageBHClick}
-        className="active-scale rounded-lg border border-border bg-slate-800/40 px-3 py-1.5 text-[12px]       
-  text-indigo-400"
-      >
-        ⚙️ Quản lý dãy trọ
-      </button>
+      <div className="flex gap-2">
+        <button
+          onClick={onAddBHClick}
+          className="active-scale flex items-center gap-1 rounded-lg border border-border bg-slate-800/40 px-3 py-1.5 text-[12.5px] font-medium text-indigo-400"
+        >
+          <Plus size={13} /> Thêm dãy trọ
+        </button>
+        {roomFilter !== "ALL" && (
+          <button
+            onClick={onManageBHClick}
+            className="active-scale rounded-lg border border-border bg-slate-800/40 px-3 py-1.5 text-[12.5px] font-medium text-indigo-400"
+          >
+            ⚙️ Sửa tên dãy
+          </button>
+        )}
+      </div>
       {/* Tab filters */}
       <div className="tabs-container flex gap-1 overflow-x-auto rounded-xl border border-border bg-surface p-1">
         <button

@@ -82,7 +82,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
       {children}
 
       {/* 2. HIỂN THỊ DANH SÁCH TOASTS (Giao diện iOS-style floating Toast) */}
-      <div className="max-w- [380px] pointer-events-none fixed left-1/2 top-4 z-[9999] flex w-full -translate-x-1/2 flex-col gap-2.5 px-4">
+      <div
+        className="pointer-events-none fixed left-1/2 z-[9999] flex w-full max-w-[380px] -translate-x-1/2 flex-col gap-2.5 px-4"
+        style={{ top: "calc(env(safe-area-inset-top) + 16px)" }}
+      >
         {toasts.map((toast) => (
           <div
             key={toast.id}

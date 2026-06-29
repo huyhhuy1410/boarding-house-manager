@@ -542,7 +542,10 @@ Xin cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
   }
 
   return (
-    <div className="mx-auto flex max-w-[480px] flex-col gap-4 px-4 pt-4">
+    <div
+      className="mx-auto flex max-w-[480px] flex-col gap-4 px-4"
+      style={{ paddingTop: "calc(env(safe-area-inset-top) + 16px)" }}
+    >
       {/* 1. APP HEADER */}
       <header className="flex items-center justify-between border-b border-border/40 pb-2 pt-1">
         <div>
@@ -586,6 +589,7 @@ Xin cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
           <HomeTab
             rooms={rooms}
             expenses={expenses}
+            boardingHouses={boardingHouses} // Thêm prop này
             chartData={chartData}
             selectedMonth={selectedMonth}
             selectedYear={selectedYear}
@@ -606,6 +610,7 @@ Xin cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
             onRoomClick={handleOpenEditRoom}
             formatCurrency={formatCurrency}
             loading={loading}
+            onAddBHClick={handleOpenAddBH} // Thêm prop này
             onManageBHClick={() => {
               // Tìm dãy trọ hiện tại đang lọc để sửa, hoặc nếu đang chọn "Tất cả" thì mở modal tạo mới
               const currentBH = boardingHouses.find(
@@ -613,8 +618,6 @@ Xin cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
               );
               if (currentBH) {
                 handleOpenEditBH(currentBH);
-              } else {
-                handleOpenAddBH();
               }
             }}
           />

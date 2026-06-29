@@ -33,6 +33,10 @@ export class RoomService {
     name: string;
     boardingHouseId: string;
     price: number;
+    status?: "VACANT" | "OCCUPIED" | "MAINTENANCE"
+    renterName?: string | null
+    renterPhone?: string | null
+    renterDeposit?: number | null
     electricityPrice?: number;
     waterPrice?: number;
     internetPrice?: number;

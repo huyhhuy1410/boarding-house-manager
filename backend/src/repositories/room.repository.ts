@@ -56,6 +56,10 @@ export class RoomRepository {
     name: string;
     boardingHouseId: string;
     price: number;
+    status?: "VACANT" | "OCCUPIED" | "MAINTENANCE";
+    renterName?: string | null;
+    renterPhone?: string | null;
+    renterDeposit?: number;
     electricityPrice?: number;
     waterPrice?: number;
     internetPrice?: number;
@@ -72,6 +76,12 @@ export class RoomRepository {
         name: data.name,
         boardingHouseId: data.boardingHouseId,
         price: new Prisma.Decimal(data.price),
+        status: data.status,
+        renterName: data.renterName,
+        renterPhone: data.renterPhone,
+        renterDeposit: data.renterDeposit
+          ? new Prisma.Decimal(data.renterDeposit)
+          : undefined,
         electricityPrice: data.electricityPrice
           ? new Prisma.Decimal(data.electricityPrice)
           : undefined,

@@ -66,6 +66,8 @@ export const RoomModal: React.FC<RoomModalProps> = ({
   const [rentStartElectricity, setRentStartElectricity] = useState<string>("0");
   const [rentStartWater, setRentStartWater] = useState<string>("0");
 
+  // Effect 1: Reset/khởi tạo toàn bộ form khi modal mở hoặc đổi phòng cần sửa.
+  // Không phụ thuộc `boardingHouses` để tránh reset form khi background poll fetch mới về.
   useEffect(() => {
     if (editingRoom) {
       setName(editingRoom.name);
@@ -87,7 +89,6 @@ export const RoomModal: React.FC<RoomModalProps> = ({
       setRentStartWater(editingRoom.rentStartWater.toString());
     } else {
       setName("");
-      setBoardingHouseId(boardingHouses[0]?.id || "");
       setPrice("");
       setElectricityPrice(formatNumberString("3500"));
       setWaterPrice(formatNumberString("15000"));
@@ -104,7 +105,16 @@ export const RoomModal: React.FC<RoomModalProps> = ({
       setRentStartElectricity("0");
       setRentStartWater("0");
     }
-  }, [editingRoom, show, boardingHouses]);
+  }, [editingRoom, show]);
+
+  // Effect 2: Chỉ set default boardingHouseId khi đang tạo phòng MỚI và chưa có giá trị.
+  // Tách ra để boardingHouses fetch mới KHÔNG reset toàn bộ form.
+  useEffect(() => {
+    if (!editingRoom && !boardingHouseId && boardingHouses.length > 0) {
+      setBoardingHouseId(boardingHouses[0].id);
+    }
+  }, [boardingHouses, editingRoom, boardingHouseId]);
+
 
   if (!show) return null;
 
