@@ -58,9 +58,9 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({
       {showExpenseForm && (
         <form
           onSubmit={onSubmit}
-          className="border-border bg-surface overflow-hidden rounded-2xl border shadow-lg"
+          className="overflow-hidden rounded-2xl border border-border bg-surface shadow-lg"
         >
-          <div className="border-border border-b px-4 pb-3 pt-4">
+          <div className="border-b border-border px-4 pb-3 pt-4">
             <h4 className="text-[14px] font-bold text-slate-100">Thêm Chi Phí Mới</h4>
           </div>
           <div className="flex flex-col gap-3 p-4">
@@ -72,7 +72,7 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({
               placeholder="Ví dụ: Thay vòi nước"
               value={expenseTitle}
               onChange={(e) => setExpenseTitle(e.target.value)}
-              className="border-border bg-bg w-full rounded-lg border px-3 py-2.5 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
+              className="w-full rounded-lg border border-border bg-bg px-3 py-2.5 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -84,7 +84,7 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({
                 placeholder="Ví dụ: 150000"
                 value={expenseAmount}
                 onChange={(e) => setExpenseAmount(e.target.value)}
-                className="border-border bg-bg w-full rounded-lg border px-3 py-2.5 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
+                className="w-full rounded-lg border border-border bg-bg px-3 py-2.5 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
               />
             </div>
             <div>
@@ -93,7 +93,7 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({
                 disabled={loading}
                 value={expenseRoomId}
                 onChange={(e) => setExpenseRoomId(e.target.value)}
-                className="border-border bg-bg w-full rounded-lg border px-3 py-2.5 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
+                className="w-full rounded-lg border border-border bg-bg px-3 py-2.5 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
               >
                 <option value="chung">Chung cả nhà</option>
                 {rooms.map((r) => (
@@ -110,10 +110,10 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({
               placeholder="Ghi chú chi tiết (nếu có)"
               value={expenseDesc}
               onChange={(e) => setExpenseDesc(e.target.value)}
-              className="border-border bg-bg w-full rounded-lg border px-3 py-2.5 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
+              className="w-full rounded-lg border border-border bg-bg px-3 py-2.5 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
             />
           </div>
-          <div className="border-border flex gap-2.5 border-t pt-2">
+          <div className="flex gap-2.5 border-t border-border pt-2">
             <button
               type="submit"
               disabled={loading}
@@ -124,7 +124,7 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({
             <button
               type="button"
               disabled={loading}
-              className="active-scale border-border flex-1 rounded-xl border py-2.5 text-[13px] text-slate-400 transition-colors hover:bg-slate-800/40 disabled:opacity-50"
+              className="active-scale flex-1 rounded-xl border border-border py-2.5 text-[13px] text-slate-400 transition-colors hover:bg-slate-800/40 disabled:opacity-50"
               onClick={() => setShowExpenseForm(false)}
             >
               Hủy
@@ -134,11 +134,11 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({
         </form>
       )}
 
-      <div className="border-border bg-surface overflow-hidden rounded-2xl border">
+      <div className="overflow-hidden rounded-2xl border border-border bg-surface">
         {loading && expenses.length === 0 ? (
-          <div className="divide-border flex flex-col divide-y">
+          <div className="flex flex-col divide-y divide-border">
             {Array.from({ length: 3 }).map((_, idx) => (
-              <div key={idx} className="bg-surface/50 flex animate-pulse items-center justify-between px-4 py-3.5">
+              <div key={idx} className="flex animate-pulse items-center justify-between bg-surface/50 px-4 py-3.5">
                 <div className="flex w-1/2 flex-col gap-1.5">
                   <div className="h-4 w-32 rounded-md bg-slate-800"></div>
                   <div className="h-3.5 w-20 rounded-md bg-slate-800"></div>
@@ -156,7 +156,7 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({
             Chưa có chi phí nào được ghi nhận.
           </div>
         ) : (
-          <div className="divide-border flex flex-col divide-y">
+          <div className="flex flex-col divide-y divide-border">
             {expenses.map((exp) => (
               <div
                 key={exp.id}

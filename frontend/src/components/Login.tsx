@@ -52,9 +52,9 @@ export function Login({ onLoginSuccess }: LoginProps) {
   };
 
   return (
-    <div className="bg-bg flex min-h-screen flex-col items-center justify-center px-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-bg px-4">
       {/* Container chính của Form */}
-      <div className="border-border bg-surface relative w-full max-w-[400px] overflow-hidden rounded-2xl border p-6 shadow-2xl">
+      <div className="relative w-full max-w-[400px] overflow-hidden rounded-2xl border border-border bg-surface p-6 shadow-2xl">
         {/* Điểm nhấn thiết kế: Hiệu ứng Gradient sáng nhẹ phía trên card */}
         <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
 
@@ -91,7 +91,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
                 placeholder="admin@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="border-border bg-bg w-full rounded-xl border py-3 pl-11 pr-4 text-[14px] text-slate-100 transition-colors placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none"
+                className="w-full rounded-xl border border-border bg-bg py-3 pl-11 pr-4 text-[14px] text-slate-100 transition-colors placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none"
                 autoFocus
                 disabled={loading}
               />
@@ -112,7 +112,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="border-border bg-bg w-full rounded-xl border px-11 py-3 text-[14px] text-slate-100 transition-colors placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none"
+                className="w-full rounded-xl border border-border bg-bg px-11 py-3 text-[14px] text-slate-100 transition-colors placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none"
                 disabled={loading}
               />
               <button

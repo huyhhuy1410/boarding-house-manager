@@ -117,9 +117,9 @@ export const RoomModal: React.FC<RoomModalProps> = ({
     <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/75 p-4 backdrop-blur-[3px]">
       <form
         onSubmit={handleSubmit}
-        className="border-border bg-surface flex max-h-[90vh] w-full max-w-[420px] flex-col gap-4 overflow-y-auto rounded-2xl border p-6 shadow-2xl"
+        className="flex max-h-[90vh] w-full max-w-[420px] flex-col gap-4 overflow-y-auto rounded-2xl border border-border bg-surface p-6 shadow-2xl"
       >
-        <div className="border-border flex items-center justify-between border-b pb-3.5">
+        <div className="flex items-center justify-between border-b border-border pb-3.5">
           <h3 className="text-[17px] font-bold text-slate-100">
             {editingRoom ? `Chỉnh sửa: ${editingRoom.name}` : "Thêm Phòng Trọ Mới"}
           </h3>
@@ -146,7 +146,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
                 placeholder="Ví dụ: A1"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
+                className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
               />
             </div>
             <div>
@@ -154,7 +154,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
               <select
                 value={boardingHouseId}
                 onChange={(e) => setBoardingHouseId(e.target.value)}
-                className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
+                className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
               >
                 <option value="" disabled>-- Chọn dãy --</option>
                 {boardingHouses.map((house) => (
@@ -172,7 +172,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
                 placeholder="Ví dụ: 3000000"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
+                className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
               />
             </div>
             <div>
@@ -184,7 +184,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
                 placeholder="Mặc định: 30"
                 value={billingDay}
                 onChange={(e) => setBillingDay(e.target.value)}
-                className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
+                className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
               />
             </div>
           </div>
@@ -204,7 +204,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
                 placeholder="3500"
                 value={electricityPrice}
                 onChange={(e) => setElectricityPrice(e.target.value)}
-                className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
+                className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
               />
             </div>
             <div>
@@ -214,7 +214,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
                 placeholder="15000"
                 value={waterPrice}
                 onChange={(e) => setWaterPrice(e.target.value)}
-                className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
+                className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
               />
             </div>
           </div>
@@ -227,7 +227,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
                 placeholder="100000"
                 value={internetPrice}
                 onChange={(e) => setInternetPrice(e.target.value)}
-                className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
+                className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
               />
             </div>
             <div>
@@ -237,7 +237,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
                 placeholder="20000"
                 value={trashPrice}
                 onChange={(e) => setTrashPrice(e.target.value)}
-                className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
+                className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
               />
             </div>
           </div>
@@ -254,7 +254,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as Room["status"])}
-              className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
+              className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
             >
               <option value="VACANT">Phòng trống</option>
               <option value="OCCUPIED">Đang thuê</option>
@@ -263,7 +263,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
           </div>
 
           {status === "OCCUPIED" && (
-            <div className="border-border bg-bg flex flex-col gap-2.5 rounded-xl border border-dashed p-3">
+            <div className="flex flex-col gap-2.5 rounded-xl border border-dashed border-border bg-bg p-3">
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
                   <label className="mb-1 block text-[11px] text-slate-400">Tên khách thuê</label>
@@ -272,7 +272,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
                     placeholder="Nguyễn Văn A"
                     value={renterName}
                     onChange={(e) => setRenterName(e.target.value)}
-                    className="border-border bg-surface w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -282,7 +282,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
                     placeholder="090..."
                     value={renterPhone}
                     onChange={(e) => setRenterPhone(e.target.value)}
-                    className="border-border bg-surface w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -294,7 +294,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
                     type="number"
                     value={renterDeposit}
                     onChange={(e) => setRenterDeposit(e.target.value)}
-                    className="border-border bg-surface w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -303,7 +303,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
                     type="number"
                     value={electricityDeposit}
                     onChange={(e) => setElectricityDeposit(e.target.value)}
-                    className="border-border bg-surface w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -314,7 +314,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
                   id="modalIsElecInc"
                   checked={isElectricityIncluded}
                   onChange={(e) => setIsElectricityIncluded(e.target.checked)}
-                  className="border-border bg-bg cursor-pointer rounded text-indigo-600 focus:ring-0 focus:ring-offset-0"
+                  className="cursor-pointer rounded border-border bg-bg text-indigo-600 focus:ring-0 focus:ring-offset-0"
                 />
                 <label
                   htmlFor="modalIsElecInc"
@@ -330,7 +330,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
                   type="date"
                   value={rentStartDate}
                   onChange={(e) => setRentStartDate(e.target.value)}
-                  className="border-border bg-surface min-h-[38px] w-full appearance-none rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
+                  className="min-h-[38px] w-full appearance-none rounded-lg border border-border bg-surface px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
                 />
               </div>
 
@@ -341,7 +341,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
                     type="number"
                     value={rentStartElectricity}
                     onChange={(e) => setRentStartElectricity(e.target.value)}
-                    className="border-border bg-surface w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -350,7 +350,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
                     type="number"
                     value={rentStartWater}
                     onChange={(e) => setRentStartWater(e.target.value)}
-                    className="border-border bg-surface w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -359,7 +359,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
         </div>
 
         {/* Buttons điều hướng */}
-        <div className="border-border mt-5 flex gap-2.5 border-t pt-4">
+        <div className="mt-5 flex gap-2.5 border-t border-border pt-4">
           {editingRoom && (
             <button
               type="button"
@@ -374,7 +374,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
             type="button"
             disabled={loading}
             onClick={onClose}
-            className="active-scale border-border flex-1 rounded-xl border py-2.5 text-[13px] text-slate-400 transition-colors hover:bg-slate-800/40"
+            className="active-scale flex-1 rounded-xl border border-border py-2.5 text-[13px] text-slate-400 transition-colors hover:bg-slate-800/40"
           >
             Hủy
           </button>

@@ -34,6 +34,9 @@ export class ExpenseRepository {
       where: {
         roomId: filter?.roomId,
       },
+      include: {
+        room: true,
+      },
       orderBy: {
         date: "desc",
       },
@@ -50,6 +53,9 @@ export class ExpenseRepository {
     const response = await prisma.expense.findUnique({
       where: {
         id,
+      },
+      include: {
+        room: true,
       },
     });
     return response;

@@ -44,9 +44,9 @@ export class RoomService {
     rentStartWater?: number;
     billingDay?: number;
   }): Promise<Room> {
-    const room = await this.roomRepository.findByName(data.name);
+    const room = await this.roomRepository.findByNameAndHouse(data.boardingHouseId, data.name);
     if (room) {
-      throw new AppError("Tên phòng trọ đã tồn tại!", 400);
+      throw new AppError("Tên phòng trọ đã tồn tại trong dãy trọ này!", 400);
     }
     return this.roomRepository.create(data);
   }
@@ -55,11 +55,15 @@ export class RoomService {
    * Updates an existing room.
    */
   async updateRoom(id: string, data: Partial<Room>): Promise<Room> {
-    await this.getRoomById(id);
     if (data.name) {
-      const existingRoom = await this.roomRepository.findByName(data.name);
+      // Khi cập nhật phòng, ta cần biết phòng đó thuộc dãy trọ nào.
+      // Lấy thông tin phòng hiện tại từ database trước:
+      const currentRoom = await this.getRoomById(id);
+      const houseId = data.boardingHouseId || currentRoom.boardingHouseId;
+
+      const existingRoom = await this.roomRepository.findByNameAndHouse(houseId, data.name);
       if (existingRoom && existingRoom.id !== id) {
-        throw new AppError("Tên phòng trọ đã tồn tại!", 400);
+        throw new AppError("Tên phòng trọ đã tồn tại trong dãy trọ này!", 400);
       }
     }
     return this.roomRepository.update(id, data);

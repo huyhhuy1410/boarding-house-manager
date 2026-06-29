@@ -33,7 +33,7 @@ model BoardingHouse {
 
 model Room {
   id                   String        @id @default(uuid())
-  name                 String        @unique // Ví dụ: "A1", "B2", "Kiot 1"
+  name                 String        // Ví dụ: "A1", "B2", "Kiot 1"
   status               RoomStatus    @default(VACANT)
   boardingHouseId      String
   boardingHouse        BoardingHouse @relation(fields: [boardingHouseId], references: [id], onDelete: Cascade)
@@ -61,6 +61,8 @@ model Room {
   expenses         Expense[]
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
+
+  @@unique([boardingHouseId, name]) // Cho phép trùng tên phòng giữa các dãy khác nhau
 }
 
 model Bill {

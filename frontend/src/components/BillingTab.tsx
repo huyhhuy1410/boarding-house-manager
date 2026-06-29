@@ -3,6 +3,7 @@ import { CheckCircle2, AlertCircle, Copy } from "lucide-react";
 import { Room } from "../services/room.service";
 import { BoardingHouse } from "../services/room.service";
 import { Bill } from "../services/bill.service";
+import { BillImageCard } from "./BillImageCard";
 
 interface BillingInputState {
   newElectricity: string;
@@ -115,7 +116,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({
       </div>
 
       {/* Bộ lọc Dãy trọ cho tab Ghi số điện (Billing) */}
-      <div className="tabs-container border-border bg-surface flex gap-1 overflow-x-auto rounded-xl border p-1">
+      <div className="tabs-container flex gap-1 overflow-x-auto rounded-xl border border-border bg-surface p-1">
         <button
           className={`active-scale flex-1 whitespace-nowrap rounded-lg px-3.5 py-2 text-[13px] font-medium transition-all ${
             roomFilter === "ALL" ? "bg-indigo-600 text-white shadow-md" : "text-slate-400 hover:text-slate-200"
@@ -143,9 +144,9 @@ export const BillingTab: React.FC<BillingTabProps> = ({
           Array.from({ length: 3 }).map((_, idx) => (
             <div
               key={idx}
-              className="border-border/50 bg-surface/50 flex animate-pulse flex-col gap-3 rounded-2xl border p-4"
+              className="flex animate-pulse flex-col gap-3 rounded-2xl border border-border/50 bg-surface/50 p-4"
             >
-              <div className="border-border/50 flex items-center justify-between border-b pb-2.5">
+              <div className="flex items-center justify-between border-b border-border/50 pb-2.5">
                 <div className="h-4 w-20 rounded-md bg-slate-800"></div>
                 <div className="h-4 w-24 rounded-md bg-slate-800"></div>
               </div>
@@ -173,7 +174,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({
             const isNewRenter = (() => {
               if (!room.rentStartDate) return false;
               const d = new Date(room.rentStartDate);
-              return d.getUTCMonth() + 1 === selectedMonth && d.getUTCFullYear() === selectedYear;
+              return d.getMonth() + 1 === selectedMonth && d.getFullYear() === selectedYear;
             })();
 
             // Xác định chỉ số điện cũ & nước cũ
@@ -181,19 +182,15 @@ export const BillingTab: React.FC<BillingTabProps> = ({
             let oldWater = room.rentStartWater;
 
             if (!isNewRenter && room.bills && room.bills.length > 0) {
-              const latestBill = room.bills[0];
-              if (latestBill.month !== selectedMonth || latestBill.year !== selectedYear) {
-                oldElectricity = latestBill.newElectricity;
-                oldWater = latestBill.newWater;
+              // Tìm hóa đơn của các tháng trước tháng hiện tại
+              const pastBills = room.bills.filter((b) => {
+                return b.year < selectedYear || (b.year === selectedYear && b.month < selectedMonth);
+              });
+              if (pastBills.length > 0) {
+                const latestPastBill = pastBills[0]; // Vì đã được orderBy desc ở backend
+                oldElectricity = latestPastBill.newElectricity;
+                oldWater = latestPastBill.newWater;
               }
-            }
-
-            // Fallback cho dữ liệu cũ (seeding) nếu chưa từng lập hóa đơn
-            if (!isNewRenter && oldElectricity === 0) {
-              oldElectricity = 1240;
-            }
-            if (!isNewRenter && oldWater === 0) {
-              oldWater = 180;
             }
 
             const inputs = billingInputs[room.id] || {
@@ -207,9 +204,9 @@ export const BillingTab: React.FC<BillingTabProps> = ({
               <div
                 key={room.id}
                 id={`room-card-${room.id}`}
-                className="border-border bg-surface flex scroll-mt-20 flex-col gap-3 rounded-2xl border p-4"
+                className="flex scroll-mt-20 flex-col gap-3 rounded-2xl border border-border bg-surface p-4"
               >
-                <div className="border-border flex items-start justify-between gap-2 border-b pb-2.5">
+                <div className="flex items-start justify-between gap-2 border-b border-border pb-2.5">
                   <span className="flex flex-wrap items-center gap-1.5 text-[16px] font-bold text-slate-100">
                     {room.name}
                     {isNewRenter && (
@@ -245,7 +242,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                       <div>Nước: {bill.oldWater} m3 ➔ {bill.newWater} m3 ({bill.newWater - bill.oldWater} m3)</div>
                     </div>
 
-                    <div className="border-border bg-bg flex flex-col gap-1.5 rounded-lg border p-3 text-slate-300">
+                    <div className="flex flex-col gap-1.5 rounded-lg border border-border bg-bg p-3 text-slate-300">
                       <div className="flex justify-between">
                         <span>Tiền phòng:</span>
                         <span>{formatCurrency(bill.rentAmount)}</span>
@@ -270,7 +267,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                           <span>+{formatCurrency(bill.extraAmount)}</span>
                         </div>
                       )}
-                      <div className="border-border flex justify-between border-t pt-1.5 text-[14px] font-bold text-indigo-400">
+                      <div className="flex justify-between border-t border-border pt-1.5 text-[14px] font-bold text-indigo-400">
                         <span>Tổng tiền phòng:</span>
                         <span>{formatCurrency(bill.totalAmount)}</span>
                       </div>
@@ -292,11 +289,17 @@ export const BillingTab: React.FC<BillingTabProps> = ({
 
                       <div className="flex gap-2">
                         <button
-                          className="active-scale border-border hover:bg-surface-hover flex w-auto items-center gap-1 rounded-lg border bg-[#1e2d4a]/50 px-3.5 py-1.5 text-[12px] font-bold text-slate-300 transition-all"
+                          className="active-scale flex w-auto items-center gap-1 rounded-lg border border-border bg-[#1e2d4a]/50 px-3.5 py-1.5 text-[12px] font-bold text-slate-300 transition-all hover:bg-surface-hover"
                           onClick={() => onCopyZalo(bill, room.name, room.renterName)}
                         >
                           <Copy size={12} /> Zalo
                         </button>
+                        <BillImageCard
+                          bill={bill}
+                          roomName={room.name}
+                          renterName={room.renterName}
+                          formatCurrency={formatCurrency}
+                        />
                         {!bill.isPaid && (
                           <button
                             disabled={loading}
@@ -322,7 +325,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                           placeholder="Nhập số điện..."
                           value={inputs.newElectricity}
                           onChange={(e) => handleInputChange(room.id, "newElectricity", e.target.value)}
-                          className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
+                          className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
                         />
                       </div>
                       <div>
@@ -333,7 +336,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                           placeholder="Nhập số nước..."
                           value={inputs.newWater}
                           onChange={(e) => handleInputChange(room.id, "newWater", e.target.value)}
-                          className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
+                          className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
                         />
                       </div>
                     </div>
@@ -347,7 +350,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                           placeholder="0"
                           value={inputs.extraAmount}
                           onChange={(e) => handleInputChange(room.id, "extraAmount", e.target.value)}
-                          className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
+                          className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
                         />
                       </div>
                       <div>
@@ -358,7 +361,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                           placeholder="Ví dụ: Thay khóa..."
                           value={inputs.extraDescription}
                           onChange={(e) => handleInputChange(room.id, "extraDescription", e.target.value)}
-                          className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
+                          className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
                         />
                       </div>
                     </div>

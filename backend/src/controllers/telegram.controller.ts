@@ -26,6 +26,15 @@ export class TelegramController {
 
       console.log(`[Telegram Bot] Incoming message from chatId: ${chatId}, text: "${text}"`);
 
+      // 🔐 Bảo mật Webhook bằng Secret Token
+      const secretToken = req.headers["x-telegram-bot-api-secret-token"];
+      const expectedToken = process.env.TELEGRAM_WEBHOOK_SECRET_TOKEN;
+      if (expectedToken && secretToken !== expectedToken) {
+        console.error(`[Telegram Bot] Unauthorized webhook call! Invalid secret token header.`);
+        res.sendStatus(200);
+        return;
+      }
+
       // TODO: Validate that the incoming chatId matches process.env.TELEGRAM_CHAT_ID to secure the webhook.
       // If unauthorized, log warning and return early with res.sendStatus(200) to stop Telegram retries.
       const chatIds =

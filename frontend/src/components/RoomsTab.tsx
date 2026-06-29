@@ -39,13 +39,13 @@ export const RoomsTab: React.FC<RoomsTabProps> = ({
     <>
       <button
         onClick={onManageBHClick}
-        className="active-scale border-border rounded-lg border bg-slate-800/40 px-3 py-1.5 text-[12px]       
+        className="active-scale rounded-lg border border-border bg-slate-800/40 px-3 py-1.5 text-[12px]       
   text-indigo-400"
       >
         ⚙️ Quản lý dãy trọ
       </button>
       {/* Tab filters */}
-      <div className="tabs-container border-border bg-surface flex gap-1 overflow-x-auto rounded-xl border p-1">
+      <div className="tabs-container flex gap-1 overflow-x-auto rounded-xl border border-border bg-surface p-1">
         <button
           className={`active-scale flex-1 whitespace-nowrap rounded-lg px-3.5 py-2 text-[13px] font-medium transition-all ${
             roomFilter === "ALL"
@@ -87,7 +87,7 @@ export const RoomsTab: React.FC<RoomsTabProps> = ({
           Array.from({ length: 4 }).map((_, idx) => (
             <div
               key={idx}
-              className="border-border/50 bg-surface/50 flex min-h-[150px] animate-pulse flex-col gap-3 rounded-2xl border p-4"
+              className="flex min-h-[150px] animate-pulse flex-col gap-3 rounded-2xl border border-border/50 bg-surface/50 p-4"
             >
               <div className="flex items-center justify-between">
                 <div className="h-4 w-16 rounded-md bg-slate-800"></div>
@@ -97,7 +97,7 @@ export const RoomsTab: React.FC<RoomsTabProps> = ({
                 <div className="h-4 w-28 rounded-md bg-slate-800"></div>
                 <div className="h-3.5 w-20 rounded-md bg-slate-800"></div>
               </div>
-              <div className="border-border/50 flex items-center justify-between border-t border-dashed pt-2.5">
+              <div className="flex items-center justify-between border-t border-dashed border-border/50 pt-2.5">
                 <div className="h-3 w-14 rounded-md bg-slate-800"></div>
                 <div className="h-3 w-10 rounded-md bg-slate-800"></div>
               </div>
@@ -115,15 +115,15 @@ export const RoomsTab: React.FC<RoomsTabProps> = ({
                 if (!room.rentStartDate) return false;
                 const d = new Date(room.rentStartDate);
                 return (
-                  d.getUTCMonth() + 1 === selectedMonth &&
-                  d.getUTCFullYear() === selectedYear
+                  d.getMonth() + 1 === selectedMonth &&
+                  d.getFullYear() === selectedYear
                 );
               })();
 
             return (
               <div
                 key={room.id}
-                className="room-card active-scale border-border bg-surface flex cursor-pointer flex-col gap-3 rounded-2xl border p-4"
+                className="room-card active-scale flex cursor-pointer flex-col gap-3 rounded-2xl border border-border bg-surface p-4"
                 onClick={() => onRoomClick(room)}
               >
                 <div className="flex items-center justify-between">
@@ -181,7 +181,7 @@ export const RoomsTab: React.FC<RoomsTabProps> = ({
                   )}
                 </div>
 
-                <div className="border-border flex items-center justify-between border-t border-dashed pt-2.5 text-[11px] text-slate-400">
+                <div className="flex items-center justify-between border-t border-dashed border-border pt-2.5 text-[11px] text-slate-400">
                   <span>Tháng này:</span>
                   {room.status === "OCCUPIED" ? (
                     room.isPaidThisMonth ? (

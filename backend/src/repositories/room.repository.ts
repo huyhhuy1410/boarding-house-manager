@@ -38,9 +38,14 @@ export class RoomRepository {
   /**
    * Tìm phòng trọ theo tên (dùng để check trùng tên)
    */
-  async findByName(name: string): Promise<Room | null> {
+  async findByNameAndHouse(boardingHouseId: string, name: string): Promise<Room | null> {
     return prisma.room.findUnique({
-      where: { name },
+      where: {
+        boardingHouseId_name: {
+          boardingHouseId,
+          name,
+        },
+      },
     });
   }
 

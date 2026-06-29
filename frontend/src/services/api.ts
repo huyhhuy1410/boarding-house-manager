@@ -18,6 +18,15 @@ api.interceptors.request.use(
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // ⚡ Bypass iOS Safari GET Cache bằng cách thêm timestamp ngẫu nhiên
+    if (config.method === "get" || config.method === "GET") {
+      config.params = {
+        ...config.params,
+        _t: Date.now(),
+      };
+    }
+
     return config;
   },
   (error) => {
@@ -38,7 +47,7 @@ api.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       console.warn("Phiên đăng nhập đã hết hạn hoặc token không hợp lệ. Đang đăng xuất...");
       localStorage.removeItem("rental_hub_token");
-      
+
       // Chỉ tự động reload lại trang khi không ở màn hình đăng nhập
       // Điều này ngăn chặn việc reload vô hạn nếu gọi API login sai mật khẩu (nếu API login trả 401)
       const isLoginEndpoint = error.config.url?.includes("/api/auth/login");

@@ -95,14 +95,7 @@ export default function App() {
       );
       setBills(billsData);
 
-      // Trích xuất danh sách các dãy trọ duy nhất từ danh sách phòng
-      const uniqueHousesMap: Record<string, BoardingHouse> = {};
-      roomsData.forEach((r) => {
-        if (r.boardingHouse) {
-          uniqueHousesMap[r.boardingHouse.id] = r.boardingHouse;
-        }
-      });
-      setBoardingHouses(Object.values(uniqueHousesMap));
+
 
       // Map thuộc tính isPaidThisMonth cho các phòng dựa vào hóa đơn đã được lập
       const mappedRooms = roomsData.map((room) => {
