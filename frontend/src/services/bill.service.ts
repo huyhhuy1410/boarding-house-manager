@@ -177,4 +177,16 @@ export const billService = {
       throw error;
     }
   },
+
+  /**
+   * Hủy/Xóa hóa đơn chưa thanh toán
+   */
+  delete: async (id: string): Promise<void> => {
+    try {
+      await api.delete(`/api/bills/${id}`);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
 };

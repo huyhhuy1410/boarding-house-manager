@@ -1,11 +1,13 @@
 import React from "react";
 import { Plus } from "lucide-react";
-import { Room } from "../services/room.service";
+import { Room, BoardingHouse } from "../services/room.service";
 import { Expense } from "../services/expense.service";
+import { formatNumberString } from "./RoomModal";
 
 interface ExpensesTabProps {
   rooms: Room[];
   expenses: Expense[];
+  boardingHouses: BoardingHouse[];
   showExpenseForm: boolean;
   setShowExpenseForm: (show: boolean) => void;
   expenseTitle: string;
@@ -25,6 +27,7 @@ interface ExpensesTabProps {
 export const ExpensesTab: React.FC<ExpensesTabProps> = ({
   rooms,
   expenses,
+  boardingHouses,
   showExpenseForm,
   setShowExpenseForm,
   expenseTitle,
@@ -58,9 +61,9 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({
       {showExpenseForm && (
         <form
           onSubmit={onSubmit}
-          className="border-border bg-surface overflow-hidden rounded-2xl border shadow-lg"
+          className="overflow-hidden rounded-2xl border border-border bg-surface shadow-lg"
         >
-          <div className="border-border border-b px-4 pb-3 pt-4">
+          <div className="border-b border-border px-4 pb-3 pt-4">
             <h4 className="text-[14px] font-bold text-slate-100">Thêm Chi Phí Mới</h4>
           </div>
           <div className="flex flex-col gap-3 p-4">
@@ -72,19 +75,19 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({
               placeholder="Ví dụ: Thay vòi nước"
               value={expenseTitle}
               onChange={(e) => setExpenseTitle(e.target.value)}
-              className="border-border bg-bg w-full rounded-lg border px-3 py-2.5 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
+              className="w-full rounded-lg border border-border bg-bg px-3 py-2.5 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="mb-1 block text-[11.5px] text-slate-400">Số tiền (đ)</label>
               <input
-                type="number"
+                type="text"
                 disabled={loading}
-                placeholder="Ví dụ: 150000"
+                placeholder="Ví dụ: 150.000"
                 value={expenseAmount}
-                onChange={(e) => setExpenseAmount(e.target.value)}
-                className="border-border bg-bg w-full rounded-lg border px-3 py-2.5 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
+                onChange={(e) => setExpenseAmount(formatNumberString(e.target.value))}
+                className="w-full rounded-lg border border-border bg-bg px-3 py-2.5 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
               />
             </div>
             <div>
@@ -93,12 +96,28 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({
                 disabled={loading}
                 value={expenseRoomId}
                 onChange={(e) => setExpenseRoomId(e.target.value)}
-                className="border-border bg-bg w-full rounded-lg border px-3 py-2.5 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
+                className="w-full rounded-lg border border-border bg-bg px-3 py-2.5 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
               >
-                <option value="chung">Chung cả nhà</option>
-                {rooms.map((r) => (
-                  <option key={r.id} value={r.id}>{r.name}</option>
-                ))}
+                <option value="chung">Chung toàn hệ thống</option>
+                
+                <optgroup label="Cả dãy trọ">
+                  {boardingHouses.map((bh) => (
+                    <option key={bh.id} value={`house:${bh.id}:${bh.name}`}>
+                      Dãy: {bh.name}
+                    </option>
+                  ))}
+                </optgroup>
+
+                <optgroup label="Từng phòng cụ thể">
+                  {rooms.map((r) => {
+                    const bhName = boardingHouses.find((h) => h.id === r.boardingHouseId)?.name || "";
+                    return (
+                      <option key={r.id} value={`room:${r.id}`}>
+                        Phòng: {r.name} {bhName ? `(${bhName})` : ""}
+                      </option>
+                    );
+                  })}
+                </optgroup>
               </select>
             </div>
           </div>
@@ -110,10 +129,10 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({
               placeholder="Ghi chú chi tiết (nếu có)"
               value={expenseDesc}
               onChange={(e) => setExpenseDesc(e.target.value)}
-              className="border-border bg-bg w-full rounded-lg border px-3 py-2.5 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
+              className="w-full rounded-lg border border-border bg-bg px-3 py-2.5 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
             />
           </div>
-          <div className="border-border flex gap-2.5 border-t pt-2">
+          <div className="flex gap-2.5 border-t border-border pt-2">
             <button
               type="submit"
               disabled={loading}
@@ -124,7 +143,7 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({
             <button
               type="button"
               disabled={loading}
-              className="active-scale border-border flex-1 rounded-xl border py-2.5 text-[13px] text-slate-400 transition-colors hover:bg-slate-800/40 disabled:opacity-50"
+              className="active-scale flex-1 rounded-xl border border-border py-2.5 text-[13px] text-slate-400 transition-colors hover:bg-slate-800/40 disabled:opacity-50"
               onClick={() => setShowExpenseForm(false)}
             >
               Hủy
@@ -134,11 +153,11 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({
         </form>
       )}
 
-      <div className="border-border bg-surface overflow-hidden rounded-2xl border">
+      <div className="overflow-hidden rounded-2xl border border-border bg-surface">
         {loading && expenses.length === 0 ? (
-          <div className="divide-border flex flex-col divide-y">
+          <div className="flex flex-col divide-y divide-border">
             {Array.from({ length: 3 }).map((_, idx) => (
-              <div key={idx} className="bg-surface/50 flex animate-pulse items-center justify-between px-4 py-3.5">
+              <div key={idx} className="flex animate-pulse items-center justify-between bg-surface/50 px-4 py-3.5">
                 <div className="flex w-1/2 flex-col gap-1.5">
                   <div className="h-4 w-32 rounded-md bg-slate-800"></div>
                   <div className="h-3.5 w-20 rounded-md bg-slate-800"></div>
@@ -156,7 +175,7 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({
             Chưa có chi phí nào được ghi nhận.
           </div>
         ) : (
-          <div className="divide-border flex flex-col divide-y">
+          <div className="flex flex-col divide-y divide-border">
             {expenses.map((exp) => (
               <div
                 key={exp.id}
@@ -165,11 +184,32 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({
                 <div>
                   <div className="text-[13.5px] font-semibold text-slate-100">{exp.title}</div>
                   <div className="mt-0.5 text-[11.5px] text-slate-400">
-                    Sửa cho: <strong className="text-slate-300">{exp.room?.name || "Chung"}</strong>
+                    Sửa cho: <strong className="text-slate-300">
+                      {(() => {
+                        if (exp.room) {
+                          const bhName = exp.room.boardingHouse?.name || "";
+                          return `Phòng ${exp.room.name} ${bhName ? `(${bhName})` : ""}`;
+                        }
+                        if (exp.description && exp.description.startsWith("Dãy trọ: ")) {
+                          const match = exp.description.match(/^Dãy trọ: ([^-\n]+)/);
+                          if (match) return `Dãy ${match[1].trim()}`;
+                        }
+                        return "Chung";
+                      })()}
+                    </strong>
                   </div>
                   {exp.description && (
                     <div className="mt-0.5 text-[11px] text-slate-500">
-                      {exp.description}
+                      {(() => {
+                        if (exp.description.startsWith("Dãy trọ: ")) {
+                          const descParts = exp.description.split(" - ");
+                          if (descParts.length > 1) {
+                            return descParts.slice(1).join(" - ");
+                          }
+                          return ""; // Chỉ có tên dãy trọ, không có mô tả chi tiết thêm
+                        }
+                        return exp.description;
+                      })()}
                     </div>
                   )}
                   <div className="mt-0.5 text-[10.5px] text-slate-600">

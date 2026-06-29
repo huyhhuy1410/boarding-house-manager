@@ -103,4 +103,15 @@ export class BillRepository {
     });
     return response;
   }
+
+  /**
+   * Xóa hóa đơn
+   */
+  async delete(id: string): Promise<Bill> {
+    const response = await prisma.bill.delete({
+      where: { id },
+      include: { room: { include: { boardingHouse: true } } },
+    });
+    return response;
+  }
 }

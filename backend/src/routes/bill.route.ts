@@ -14,5 +14,6 @@ router.use(authMiddleware);
 router.post("/", validate(createBillSchema), controller.createBill);
 router.get("/", controller.getBills);
 router.patch("/:id/pay", controller.payBill);
+router.delete("/:id", controller.destroy);
 
 export default router;

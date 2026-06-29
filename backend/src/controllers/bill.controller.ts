@@ -42,4 +42,14 @@ export class BillController {
     const bill = await this.billService.payBill(id);
     res.status(200).json(bill);
   });
+
+  /**
+   * HTTP DELETE /api/bills/:id
+   * Deletes a bill.
+   */
+  destroy = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const id = req.params.id;
+    const deletedBill = await this.billService.deleteBill(id);
+    res.status(200).json(deletedBill);
+  });
 }

@@ -67,7 +67,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     return (
       <>
         {/* SKELETON BIỂU ĐỒ */}
-        <section className="border-border bg-surface flex animate-pulse flex-col gap-2.5 rounded-2xl border p-4">
+        <section className="flex animate-pulse flex-col gap-2.5 rounded-2xl border border-border bg-surface p-4">
           <div className="h-3 w-16 rounded-md bg-slate-800"></div>
           <div className="mt-1 h-5 w-48 rounded-md bg-slate-800"></div>
           <div className="mt-4 h-[200px] w-full rounded-xl bg-slate-800/40"></div>
@@ -76,7 +76,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         {/* SKELETON THỐNG KÊ NHANH (STATS GRID) */}
         <section className="grid grid-cols-2 gap-3">
           {Array.from({ length: 4 }).map((_, idx) => (
-            <div key={idx} className="border-border bg-surface flex animate-pulse items-center gap-3 rounded-2xl border p-4">
+            <div key={idx} className="flex animate-pulse items-center gap-3 rounded-2xl border border-border bg-surface p-4">
               <div className="size-9 shrink-0 rounded-xl bg-slate-800"></div>
               <div className="flex flex-1 flex-col gap-1.5">
                 <div className="h-3 w-16 rounded-md bg-slate-800"></div>
@@ -87,13 +87,13 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         </section>
 
         {/* SKELETON CHI PHÍ GẦN NHẤT */}
-        <section className="border-border bg-surface animate-pulse overflow-hidden rounded-2xl border">
-          <div className="border-border border-b px-4 pb-3 pt-4">
+        <section className="animate-pulse overflow-hidden rounded-2xl border border-border bg-surface">
+          <div className="border-b border-border px-4 pb-3 pt-4">
             <div className="h-3.5 w-40 rounded-md bg-slate-800"></div>
           </div>
-          <div className="divide-border/50 flex flex-col divide-y">
+          <div className="flex flex-col divide-y divide-border/50">
             {Array.from({ length: 3 }).map((_, idx) => (
-              <div key={idx} className="bg-surface/50 flex items-center justify-between px-4 py-3">
+              <div key={idx} className="flex items-center justify-between bg-surface/50 px-4 py-3">
                 <div className="flex w-1/2 flex-col gap-1.5">
                   <div className="h-4 w-28 rounded-md bg-slate-800"></div>
                   <div className="h-3 w-20 rounded-md bg-slate-800"></div>
@@ -110,7 +110,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   return (
     <>
       {/* BIỂU ĐỒ DOANH THU & CHI PHÍ SỬA CHỮA */}
-      <section className="border-border bg-surface flex flex-col gap-2.5 rounded-2xl border p-4">
+      <section className="flex flex-col gap-2.5 rounded-2xl border border-border bg-surface p-4">
         <div className="flex flex-col gap-0.5">
           <span className="text-[11px] font-medium uppercase tracking-widest text-slate-500">
             Dòng tiền
@@ -153,7 +153,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
 
       {/* THỐNG KÊ NHANH (STATS GRID) */}
       <section className="grid grid-cols-2 gap-3">
-        <div className="border-border bg-surface flex items-center gap-3 rounded-2xl border p-4">
+        <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-4">
           <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-indigo-950/50 text-indigo-400">
             <Calendar size={18} />
           </div>
@@ -163,7 +163,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           </div>
         </div>
 
-        <div className="border-border bg-surface flex items-center gap-3 rounded-2xl border p-4">
+        <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-4">
           <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-emerald-950/50 text-emerald-400">
             <DollarSign size={18} />
           </div>
@@ -173,7 +173,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           </div>
         </div>
 
-        <div className="border-border bg-surface col-span-2 flex items-center gap-3 rounded-2xl border p-4">
+        <div className="col-span-2 flex items-center gap-3 rounded-2xl border border-border bg-surface p-4">
           <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-amber-950/50 text-amber-400">
             <Activity size={18} />
           </div>
@@ -183,7 +183,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           </div>
         </div>
 
-        <div className="border-border bg-surface flex items-center gap-3 rounded-2xl border p-4">
+        <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-4">
           <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-emerald-950/50 text-emerald-400">
             <CheckCircle2 size={18} />
           </div>
@@ -193,7 +193,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           </div>
         </div>
 
-        <div className="border-border bg-surface flex items-center gap-3 rounded-2xl border p-4">
+        <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-4">
           <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-red-950/50 text-red-400">
             <AlertCircle size={18} />
           </div>
@@ -205,8 +205,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       </section>
 
       {/* Chi phí phát sinh gần nhất */}
-      <section className="border-border bg-surface overflow-hidden rounded-2xl border">
-        <div className="border-border border-b px-4 pb-3 pt-4">
+      <section className="overflow-hidden rounded-2xl border border-border bg-surface">
+        <div className="border-b border-border px-4 pb-3 pt-4">
           <h4 className="text-[12px] font-medium uppercase tracking-widest text-slate-500">
             Chi phí phát sinh gần nhất
           </h4>
@@ -216,7 +216,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             Chưa có chi phí nào phát sinh.
           </div>
         ) : (
-          <div className="divide-border flex flex-col divide-y">
+          <div className="flex flex-col divide-y divide-border">
             {expenses.slice(0, 5).map((exp) => (
               <div
                 key={exp.id}

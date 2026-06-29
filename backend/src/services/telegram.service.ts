@@ -8,12 +8,7 @@ import axios from "axios";
 export class TelegramService {
   private billService = new BillService();
 
-  // Temporary storage to cache incomplete utility readings before generating a bill.
-  // Maps roomId -> { electricity, water, updatedAt }
-  private tempReadings = new Map<
-    string,
-    { electricity?: number; water?: number; updatedAt: number }
-  >();
+
 
   /**
    * Sends an HTML-formatted message to a Telegram chat.
@@ -51,7 +46,17 @@ export class TelegramService {
    * @returns The found room with its latest bill and boarding house info.
    */
   private async findRoomByName(inputName: string) {
-    const searchName = inputName.trim().toLowerCase();
+    const parts = inputName.split("/");
+    let targetHouseName = "";
+    let targetRoomName = "";
+
+    if (parts.length === 2) {
+      targetHouseName = parts[0].trim().toLowerCase();
+      targetRoomName = parts[1].trim().toLowerCase();
+    } else {
+      targetRoomName = inputName.trim().toLowerCase();
+    }
+
     try {
       const rooms = await prisma.room.findMany({
         include: {
@@ -63,19 +68,40 @@ export class TelegramService {
         },
       });
 
-      const room = rooms.find((room) => {
+      const matchedRooms = rooms.filter((room) => {
         const rName = room.name.toLowerCase();
-        return (
-          rName === searchName ||
-          rName === `phòng ${searchName}` ||
-          rName.replace("phòng", "").trim() === searchName
+        const matchesRoom = (
+          rName === targetRoomName ||
+          rName === `phòng ${targetRoomName}` ||
+          rName.replace("phòng", "").trim() === targetRoomName
         );
+
+        if (!matchesRoom) return false;
+
+        // Nếu có chỉ định dãy trọ, lọc thêm theo tên dãy trọ
+        if (targetHouseName) {
+          const hName = room.boardingHouse.name.toLowerCase();
+          return (
+            hName.includes(targetHouseName) ||
+            targetHouseName.includes(hName)
+          );
+        }
+
+        return true;
       });
 
-      if (!room) {
-        throw new Error(`Room not found: ${inputName}`);
+      if (matchedRooms.length === 0) {
+        throw new Error(`Không tìm thấy phòng "${inputName}"`);
       }
-      return room;
+
+      if (matchedRooms.length > 1) {
+        const houseNames = matchedRooms.map((r) => r.boardingHouse.name).join(", ");
+        throw new Error(
+          `Tìm thấy nhiều phòng trùng tên "${targetRoomName}" ở các dãy: ${houseNames}. Vui lòng chỉ định rõ dãy trọ bằng cú pháp: [tên_dãy]/[tên_phòng] (Ví dụ: 9do/${targetRoomName})`
+        );
+      }
+
+      return matchedRooms[0];
     } catch (error) {
       console.error("Error finding room by name:", error);
       throw error;
@@ -105,25 +131,7 @@ export class TelegramService {
       return;
     }
 
-    // Command: /dien [room] [value] - Logs electricity reading
-    const electricityMatch = command.match(
-      /^\/(?:dien|d|electricity|e)\s+(\S+)\s+(\d+)$/i,
-    );
-    if (electricityMatch) {
-      const [_, roomInput, readingStr] = electricityMatch;
-      const reading = Number(readingStr);
-      await this.handleLogUtility(chatId, roomInput, "electricity", reading);
-      return;
-    }
 
-    // Command: /nuoc [room] [value] - Logs water reading
-    const waterMatch = command.match(/^\/(?:nuoc|n|water|w)\s+(\S+)\s+(\d+)$/i);
-    if (waterMatch) {
-      const [_, roomInput, readingStr] = waterMatch;
-      const reading = Number(readingStr);
-      await this.handleLogUtility(chatId, roomInput, "water", reading);
-      return;
-    }
 
     // Command: /bill [room] [elec] [water] - Forces manual bill generation
     const billMatch = command.match(/^\/(?:bill|b)\s+(\S+)\s+(\d+)\s+(\d+)$/i);
@@ -162,9 +170,7 @@ export class TelegramService {
 
     Các lệnh được hỗ trợ:
     - 📊 <b>/status</b> - Xem danh sách trạng thái hóa đơn.
-    - ⚡ <b>/dien [tên_phòng] [chỉ_số]</b> - Ghi số điện.
-    - 💧 <b>/nuoc [tên_phòng] [chỉ_số]</b> - Ghi số nước.
-    - 📝 <b>/bill [tên_phòng] [điện] [nước]</b> - Tạo hóa đơn mới.
+    - 📝 <b>/bill [tên_phòng] [điện] [nước]</b> - Tạo hóa đơn mới (chốt điện & nước).
     - 🛠️ <b>/chi [tên_phòng/chung] [tiền] [lý_do]</b> - Ghi chi phí sửa chữa/phát sinh.
     `;
     await this.sendMessage(chatId, helpMessage);
@@ -223,133 +229,6 @@ export class TelegramService {
   }
 
   /**
-   * Logs a single utility reading. Caches it until both readings are complete,
-   * then auto-triggers bill generation.
-   * @param chatId Telegram chat ID.
-   * @param roomInput User input for the room name.
-   * @param utility The type of utility ("electricity" | "water").
-   * @param reading The new reading value.
-   */
-  private async handleLogUtility(
-    chatId: string | number,
-    roomInput: string,
-    utility: "electricity" | "water",
-    reading: number,
-  ): Promise<void> {
-    try {
-      const room = await this.findRoomByName(roomInput);
-      if (!room) {
-        await this.sendMessage(chatId, `Không tìm thấy phòng ${roomInput}`);
-        return;
-      }
-      if (room.status !== "OCCUPIED") {
-        await this.sendMessage(
-          chatId,
-          "Phòng này chưa có người ở. Không thể ghi chỉ số điện/nước",
-        );
-        return;
-      }
-
-      const now = new Date();
-      const currentMonth = now.getMonth() + 1;
-      const currentYear = now.getFullYear();
-
-      // Check if a bill has already been generated for this month
-      const bill = await prisma.bill.findUnique({
-        where: {
-          roomId_month_year: {
-            roomId: room.id,
-            month: currentMonth,
-            year: currentYear,
-          },
-        },
-      });
-
-      if (bill) {
-        await this.sendMessage(
-          chatId,
-          `Phòng ${room.name} đã có hóa đơn tháng ${currentMonth}/${currentYear} rồi`,
-        );
-        return;
-      }
-
-      // Determine previous reference reading based on rent start date or last bill
-      const rentStartDate = room.rentStartDate;
-      let oldReading = 0;
-
-      if (rentStartDate) {
-        const rentStartMonth = rentStartDate.getMonth() + 1;
-        const rentStartYear = rentStartDate.getFullYear();
-
-        if (rentStartMonth === currentMonth && rentStartYear === currentYear) {
-          // If first month of rent, use starting values from room schema
-          oldReading =
-            utility === "electricity"
-              ? room.rentStartElectricity || 0
-              : room.rentStartWater || 0;
-        } else {
-          // Use previous bill's final readings
-          const lastBill = room.bills[0];
-          oldReading =
-            utility === "electricity"
-              ? lastBill?.newElectricity || 0
-              : lastBill?.newWater || 0;
-        }
-      }
-
-      // Validation: Prevent new readings from being lower than previous ones
-      if (reading < oldReading) {
-        await this.sendMessage(
-          chatId,
-          `Số mới (${reading}) không được nhỏ hơn số cũ (${oldReading})!`,
-        );
-        return;
-      }
-
-      // Get existing cached reading or initialize
-      let cache = this.tempReadings.get(room.id);
-      if (!cache) {
-        cache = {
-          updatedAt: new Date().getTime(),
-        };
-      }
-
-      if (utility === "electricity") {
-        cache.electricity = reading;
-      } else {
-        cache.water = reading;
-      }
-
-      cache.updatedAt = new Date().getTime();
-      this.tempReadings.set(room.id, cache);
-
-      // If both utility readings are now present, create the bill
-      if (cache.electricity !== undefined && cache.water !== undefined) {
-        await this.createBillWithLogging(
-          chatId,
-          room.id,
-          room.name,
-          currentMonth,
-          currentYear,
-          cache.electricity,
-          cache.water,
-        );
-        // Clear reading cache on success
-        this.tempReadings.delete(room.id);
-      } else {
-        const remaining = utility === "electricity" ? "nước" : "điện";
-        await this.sendMessage(
-          chatId,
-          `Đã ghi nhận số ${utility === "electricity" ? "điện" : "nước"} (${reading}). Vui lòng nhập số ${remaining} để hoàn tất`,
-        );
-      }
-    } catch (error) {
-      console.error("Error in handleLogUtility:", error);
-      await this.sendMessage(chatId, `Lỗi khi ghi chỉ số điện/nước`);
-    }
-  }
-
-  /**
    * Generates a monthly bill, calculates details, creates database entries, and replies with a receipt.
    * @param chatId Telegram chat ID.
    * @param roomId The room database ID.
@@ -387,9 +266,12 @@ export class TelegramService {
       let oldWater = room.rentStartWater;
 
       // Check if this month is the tenant's first month
-      const isNewRenter = room.rentStartDate
-        ? room.rentStartDate.getMonth() + 1 === month &&
-          room.rentStartDate.getFullYear() === year
+      const vnRentDate = room.rentStartDate
+        ? new Date(room.rentStartDate.getTime() + 7 * 60 * 60 * 1000)
+        : null;
+      const isNewRenter = vnRentDate
+        ? vnRentDate.getUTCMonth() + 1 === month &&
+          vnRentDate.getUTCFullYear() === year
         : false;
 
       if (!isNewRenter && room.bills.length > 0) {

@@ -17,7 +17,7 @@ import { RoomsTab } from "./components/RoomsTab";
 import { BillingTab } from "./components/BillingTab";
 import { ExpensesTab } from "./components/ExpensesTab";
 import { BoardingHouseModal } from "./components/BoardingHouseModal";
-import { RoomModal } from "./components/RoomModal";
+import { RoomModal, parseNumberString } from "./components/RoomModal";
 import { Login } from "./components/Login";
 
 // Auth
@@ -127,6 +127,36 @@ export default function App() {
     }
   }, [selectedMonth, selectedYear, isAuthenticated]);
 
+  // Auto refresh when returning from background (iOS PWA switch helper)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        fetchRoomsAndBills();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleVisibilityChange);
+    };
+  }, [isAuthenticated, selectedMonth, selectedYear]);
+
+  // Auto poll every 20 seconds to sync background changes (e.g. Telegram chốt số)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const interval = setInterval(() => {
+      fetchRoomsAndBills();
+    }, 20000);
+
+    return () => clearInterval(interval);
+  }, [isAuthenticated, selectedMonth, selectedYear]);
+
   const handleLoginSuccess = (user: User) => {
     setCurrentUser(user);
     setIsAuthenticated(true);
@@ -156,7 +186,7 @@ export default function App() {
 
       const newElectricity = Number(inputs.newElectricity);
       const newWater = Number(inputs.newWater);
-      const extraAmount = Number(inputs.extraAmount || 0);
+      const extraAmount = Number(parseNumberString(inputs.extraAmount || "0"));
       const extraDescription = inputs.extraDescription;
 
       if (isNaN(newElectricity) || inputs.newElectricity === "") {
@@ -241,6 +271,28 @@ export default function App() {
     }
   };
 
+  // Xử lý hủy/xóa hóa đơn chưa thanh toán
+  const handleDeleteBill = async (billId: string) => {
+    try {
+      setLoading(true);
+      await billService.delete(billId);
+      await fetchRoomsAndBills();
+      showToast("Đã hủy chốt hóa đơn!");
+    } catch (err) {
+      const errorResponse = err as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
+      const msg =
+        errorResponse.response?.data?.message ||
+        errorResponse.message ||
+        "Không thể hủy hóa đơn!";
+      showToast("Lỗi: " + msg, "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Thêm chi phí bảo trì mới
   const handleCreateExpense = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -250,11 +302,23 @@ export default function App() {
     }
     try {
       setLoading(true);
+      let finalRoomId: string | null = null;
+      let finalDesc: string | null = expenseDesc || null;
+
+      if (expenseRoomId.startsWith("house:")) {
+        const parts = expenseRoomId.split(":");
+        const bhName = parts[2];
+        finalRoomId = null;
+        finalDesc = `Dãy trọ: ${bhName}${expenseDesc ? ` - ${expenseDesc}` : ""}`;
+      } else if (expenseRoomId.startsWith("room:")) {
+        finalRoomId = expenseRoomId.substring(5);
+      }
+
       await expenseService.create({
         title: expenseTitle,
-        amount: Number(expenseAmount),
-        description: expenseDesc || null,
-        roomId: expenseRoomId === "chung" ? null : expenseRoomId,
+        amount: Number(parseNumberString(expenseAmount)),
+        description: finalDesc,
+        roomId: finalRoomId,
       });
       setExpenseTitle("");
       setExpenseAmount("");
@@ -482,7 +546,7 @@ Xin cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
   return (
     <div className="mx-auto flex max-w-[480px] flex-col gap-4 px-4 pt-4">
       {/* 1. APP HEADER */}
-      <header className="border-border/40 flex items-center justify-between border-b pb-2 pt-1">
+      <header className="flex items-center justify-between border-b border-border/40 pb-2 pt-1">
         <div>
           <h1 className="bg-gradient-to-r from-white to-indigo-200 bg-clip-text text-[22px] font-extrabold leading-tight text-transparent">
             Quản Lý Trọ Việt
@@ -493,7 +557,7 @@ Xin cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
         </div>
         <button
           onClick={authService.logout}
-          className="active-scale border-border cursor-pointer rounded-lg border bg-[#1e293b] px-3 py-1.5 text-[11px] font-medium text-slate-300 transition-colors hover:bg-red-950/40 hover:text-red-400"
+          className="active-scale cursor-pointer rounded-lg border border-border bg-[#1e293b] px-3 py-1.5 text-[11px] font-medium text-slate-300 transition-colors hover:bg-red-950/40 hover:text-red-400"
         >
           Đăng xuất
         </button>
@@ -509,8 +573,11 @@ Xin cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
       {/* MAIN CONTAINER CONTENT VIEW */}
       <main className="flex flex-col gap-4 pb-24">
         {loading && (
-          <div className="fixed left-1/2 top-5 z-[9999] -translate-x-1/2 rounded-full bg-indigo-600 px-3.5 py-1.5 text-[11.5px] font-bold text-white shadow-lg">
-            Đang tải dữ liệu...
+          <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-slate-950/40 backdrop-blur-[2px]">
+            <div className="flex flex-col items-center gap-3 rounded-2xl border border-slate-800/80 bg-slate-900/90 p-6 shadow-2xl">
+              <div className="size-10 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent"></div>
+              <span className="text-[13px] font-bold text-slate-200">Đang xử lý...</span>
+            </div>
           </div>
         )}
 
@@ -566,6 +633,7 @@ Xin cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
             setBillingInputs={setBillingInputs}
             onCreateBill={handleCreateBill}
             onPayBill={handlePayBill}
+            onDeleteBill={handleDeleteBill}
             onCopyZalo={handleCopyZalo}
             formatCurrency={formatCurrency}
             loading={loading}
@@ -576,6 +644,7 @@ Xin cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
           <ExpensesTab
             rooms={rooms}
             expenses={expenses}
+            boardingHouses={boardingHouses}
             showExpenseForm={showExpenseForm}
             setShowExpenseForm={setShowExpenseForm}
             expenseTitle={expenseTitle}
@@ -619,7 +688,7 @@ Xin cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
       />
 
       {/* 3. BOTTOM TAB BAR (iOS STYLE) */}
-      <nav className="bottom-nav border-border fixed bottom-0 left-1/2 z-50 flex w-full max-w-[480px] -translate-x-1/2 justify-around border-t bg-[#151f32]/95 pb-[calc(10px+var(--safe-area-bottom))] pt-3 backdrop-blur-[20px]">
+      <nav className="bottom-nav fixed bottom-0 left-1/2 z-50 flex w-full max-w-[480px] -translate-x-1/2 justify-around border-t border-border bg-[#151f32]/95 pb-[calc(10px+var(--safe-area-bottom))] pt-3 backdrop-blur-[20px]">
         <button
           className={`flex flex-1 cursor-pointer flex-col items-center gap-1 border-0 bg-transparent text-[11px] font-medium ${
             activeTab === "home"

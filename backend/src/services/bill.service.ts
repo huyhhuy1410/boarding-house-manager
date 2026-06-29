@@ -114,4 +114,18 @@ export class BillService {
     }
     return this.billRepository.updatePaymentStatus(id, true);
   }
+
+  /**
+   * Hủy/Xóa hóa đơn chưa thanh toán
+   */
+  async deleteBill(id: string): Promise<Bill> {
+    const bill = await this.billRepository.findById(id);
+    if (!bill) {
+      throw new AppError("Hóa đơn không tồn tại!", 404);
+    }
+    if (bill.isPaid) {
+      throw new AppError("Không thể hủy hóa đơn đã thanh toán!", 400);
+    }
+    return this.billRepository.delete(id);
+  }
 }
