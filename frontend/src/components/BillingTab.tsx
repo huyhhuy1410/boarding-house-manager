@@ -4,6 +4,13 @@ import { Room } from "../services/room.service";
 import { BoardingHouse } from "../services/room.service";
 import { Bill } from "../services/bill.service";
 
+interface BillingInputState {
+  newElectricity: string;
+  newWater: string;
+  extraAmount: string;
+  extraDescription: string;
+}
+
 interface BillingTabProps {
   rooms: Room[];
   bills: Bill[];
@@ -12,16 +19,8 @@ interface BillingTabProps {
   setRoomFilter: (filter: string) => void;
   selectedMonth: number;
   selectedYear: number;
-  billingInputs: Record<
-    string,
-    {
-      newElectricity: string;
-      newWater: string;
-      extraAmount: string;
-      extraDescription: string;
-    }
-  >;
-  setBillingInputs: React.Dispatch<React.SetStateAction<any>>;
+  billingInputs: Record<string, BillingInputState>;
+  setBillingInputs: React.Dispatch<React.SetStateAction<Record<string, BillingInputState>>>;
   onCreateBill: (roomId: string, oldElectricity: number, oldWater: number) => Promise<void>;
   onPayBill: (billId: string) => Promise<void>;
   onCopyZalo: (bill: Bill, roomName: string, renterName: string | null) => void;
@@ -48,7 +47,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({
   const activeRooms = rooms.filter((r) => r.status === "OCCUPIED" && (roomFilter === "ALL" || r.boardingHouseId === roomFilter));
 
   const handleInputChange = (roomId: string, field: string, value: string) => {
-    setBillingInputs((prev: any) => ({
+    setBillingInputs((prev: Record<string, BillingInputState>) => ({
       ...prev,
       [roomId]: {
         ...(prev[roomId] || {
@@ -62,19 +61,63 @@ export const BillingTab: React.FC<BillingTabProps> = ({
     }));
   };
 
+  // Hàm wrapper xử lý tạo hóa đơn và tự động nhảy sang phòng tiếp theo chưa ghi số
+  const handleSubmitBill = async (roomId: string, oldElectricity: number, oldWater: number) => {
+    try {
+      // 1. Lưu hóa đơn phòng hiện tại
+      await onCreateBill(roomId, oldElectricity, oldWater);
+
+      // 2. Tìm phòng kế tiếp chưa chốt hóa đơn trong danh sách đã lọc
+      setTimeout(() => {
+        const currentIndex = activeRooms.findIndex((r) => r.id === roomId);
+        if (currentIndex !== -1) {
+          let nextRoom = null;
+          // Duyệt từ vị trí tiếp theo trở đi
+          for (let i = currentIndex + 1; i < activeRooms.length; i++) {
+            const r = activeRooms[i];
+            const hasBill = bills.some((b) => b.roomId === r.id);
+            if (!hasBill) {
+              nextRoom = r;
+              break;
+            }
+          }
+
+          // 3. Cuộn mượt mà đến phòng kế tiếp và chọn ô input điện mới
+          if (nextRoom) {
+            const cardEl = document.getElementById(`room-card-${nextRoom.id}`);
+            const inputEl = document.getElementById(`elec-input-${nextRoom.id}`) as HTMLInputElement | null;
+
+            if (cardEl) {
+              cardEl.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+
+            if (inputEl) {
+              setTimeout(() => {
+                inputEl.focus();
+                inputEl.select(); // Tiện ích: Chọn sẵn văn bản để người dùng gõ đè số mới lên ngay
+              }, 300);
+            }
+          }
+        }
+      }, 200);
+    } catch (err) {
+      console.error("Lỗi khi xử lý nhảy phòng tiếp theo:", err);
+    }
+  };
+
   return (
     <section className="flex flex-col gap-4">
       <div>
         <h3 className="text-[17px] font-bold text-slate-100">Chỉ số điện nước tháng này</h3>
-        <p className="text-[12.5px] text-slate-500 mt-1">
+        <p className="mt-1 text-[12.5px] text-slate-500">
           Nhập nhanh chỉ số điện nước cuối tháng để tạo hóa đơn gửi khách.
         </p>
       </div>
 
       {/* Bộ lọc Dãy trọ cho tab Ghi số điện (Billing) */}
-      <div className="tabs-container flex bg-surface border border-border p-1 rounded-xl gap-1 overflow-x-auto">
+      <div className="tabs-container border-border bg-surface flex gap-1 overflow-x-auto rounded-xl border p-1">
         <button
-          className={`flex-1 py-2 px-3.5 rounded-lg text-[13px] font-medium transition-all whitespace-nowrap active-scale ${
+          className={`active-scale flex-1 whitespace-nowrap rounded-lg px-3.5 py-2 text-[13px] font-medium transition-all ${
             roomFilter === "ALL" ? "bg-indigo-600 text-white shadow-md" : "text-slate-400 hover:text-slate-200"
           }`}
           onClick={() => setRoomFilter("ALL")}
@@ -84,7 +127,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({
         {boardingHouses.map((house) => (
           <button
             key={house.id}
-            className={`flex-1 py-2 px-3.5 rounded-lg text-[13px] font-medium transition-all whitespace-nowrap active-scale ${
+            className={`active-scale flex-1 whitespace-nowrap rounded-lg px-3.5 py-2 text-[13px] font-medium transition-all ${
               roomFilter === house.id ? "bg-indigo-600 text-white shadow-md" : "text-slate-400 hover:text-slate-200"
             }`}
             onClick={() => setRoomFilter(house.id)}
@@ -94,9 +137,33 @@ export const BillingTab: React.FC<BillingTabProps> = ({
         ))}
       </div>
 
-      <div className="flex flex-col gap-3 mt-1">
-        {activeRooms.length === 0 ? (
-          <div className="text-center text-slate-400 py-10 px-4 text-[13px]">
+      <div className="mt-1 flex flex-col gap-3">
+        {loading && rooms.length === 0 ? (
+          // Hiển thị 3 Card Skeleton khi đang tải dữ liệu lần đầu
+          Array.from({ length: 3 }).map((_, idx) => (
+            <div
+              key={idx}
+              className="border-border/50 bg-surface/50 flex animate-pulse flex-col gap-3 rounded-2xl border p-4"
+            >
+              <div className="border-border/50 flex items-center justify-between border-b pb-2.5">
+                <div className="h-4 w-20 rounded-md bg-slate-800"></div>
+                <div className="h-4 w-24 rounded-md bg-slate-800"></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <div className="h-3.5 w-24 rounded-md bg-slate-800"></div>
+                  <div className="h-9 rounded-lg bg-slate-800"></div>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <div className="h-3.5 w-24 rounded-md bg-slate-800"></div>
+                  <div className="h-9 rounded-lg bg-slate-800"></div>
+                </div>
+              </div>
+              <div className="mt-1 h-10 rounded-lg bg-slate-800"></div>
+            </div>
+          ))
+        ) : activeRooms.length === 0 ? (
+          <div className="px-4 py-10 text-center text-[13px] text-slate-400">
             Chưa có phòng nào đang thuê trong dãy trọ này.
           </div>
         ) : (
@@ -139,32 +206,33 @@ export const BillingTab: React.FC<BillingTabProps> = ({
             return (
               <div
                 key={room.id}
-                className="bg-surface border border-border rounded-2xl p-4 flex flex-col gap-3"
+                id={`room-card-${room.id}`}
+                className="border-border bg-surface flex scroll-mt-20 flex-col gap-3 rounded-2xl border p-4"
               >
-                <div className="flex justify-between items-start border-b border-border pb-2.5 gap-2">
-                  <span className="text-[16px] font-bold text-slate-100 flex flex-wrap items-center gap-1.5">
+                <div className="border-border flex items-start justify-between gap-2 border-b pb-2.5">
+                  <span className="flex flex-wrap items-center gap-1.5 text-[16px] font-bold text-slate-100">
                     {room.name}
                     {isNewRenter && (
-                      <span className="text-[8.5px] px-1.5 py-0.5 rounded bg-indigo-950/50 text-indigo-400 border border-indigo-900/60 font-bold">
+                      <span className="rounded border border-indigo-900/60 bg-indigo-950/50 px-1.5 py-0.5 text-[8.5px] font-bold text-indigo-400">
                         Mới
                       </span>
                     )}
                     {room.isElectricityIncluded && (
-                      <span className="text-[8.5px] px-1.5 py-0.5 rounded bg-emerald-950/50 text-emerald-400 border border-emerald-900/60 font-bold">
+                      <span className="rounded border border-emerald-900/60 bg-emerald-950/50 px-1.5 py-0.5 text-[8.5px] font-bold text-emerald-400">
                         Bao Điện
                       </span>
                     )}
                     <span
-                      className={`text-[8.5px] px-1.5 py-0.5 rounded border font-bold ${
+                      className={`rounded border px-1.5 py-0.5 text-[8.5px] font-bold ${
                         new Date().getDate() === room.billingDay
-                          ? "bg-amber-950/50 text-amber-400 border-amber-900/60 font-extrabold animate-pulse"
-                          : "bg-slate-800/40 text-slate-400 border-slate-700/60"
+                          ? "animate-pulse border-amber-900/60 bg-amber-950/50 font-extrabold text-amber-400"
+                          : "border-slate-700/60 bg-slate-800/40 text-slate-400"
                       }`}
                     >
                       {new Date().getDate() === room.billingDay ? `Đến hạn (Ngày ${room.billingDay})` : `Hạn: Ngày ${room.billingDay}`}
                     </span>
                   </span>
-                  <span className="text-[12px] text-slate-500 shrink-0 pt-0.5">
+                  <span className="shrink-0 pt-0.5 text-[12px] text-slate-500">
                     {room.renterName}
                   </span>
                 </div>
@@ -177,7 +245,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                       <div>Nước: {bill.oldWater} m3 ➔ {bill.newWater} m3 ({bill.newWater - bill.oldWater} m3)</div>
                     </div>
 
-                    <div className="p-3 rounded-lg bg-[#0b0f19] border border-border flex flex-col gap-1.5 text-slate-300">
+                    <div className="border-border bg-bg flex flex-col gap-1.5 rounded-lg border p-3 text-slate-300">
                       <div className="flex justify-between">
                         <span>Tiền phòng:</span>
                         <span>{formatCurrency(bill.rentAmount)}</span>
@@ -202,21 +270,21 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                           <span>+{formatCurrency(bill.extraAmount)}</span>
                         </div>
                       )}
-                      <div className="flex justify-between font-bold border-t border-border pt-1.5 text-[14px] text-indigo-400">
+                      <div className="border-border flex justify-between border-t pt-1.5 text-[14px] font-bold text-indigo-400">
                         <span>Tổng tiền phòng:</span>
                         <span>{formatCurrency(bill.totalAmount)}</span>
                       </div>
                     </div>
 
-                    <div className="flex justify-between items-center mt-1">
+                    <div className="mt-1 flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
                         <span>Thanh toán:</span>
                         {bill.isPaid ? (
-                          <span className="text-emerald-400 font-bold flex items-center gap-1">
+                          <span className="flex items-center gap-1 font-bold text-emerald-400">
                             <CheckCircle2 size={14} /> Đã đóng
                           </span>
                         ) : (
-                          <span className="text-red-400 font-bold flex items-center gap-1">
+                          <span className="flex items-center gap-1 font-bold text-red-400">
                             <AlertCircle size={14} /> Chưa đóng
                           </span>
                         )}
@@ -224,7 +292,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({
 
                       <div className="flex gap-2">
                         <button
-                          className="w-auto px-3.5 py-1.5 text-[12px] font-bold flex items-center gap-1 bg-[#1e2d4a]/50 text-slate-300 border border-border rounded-lg hover:bg-[#1e2d4a] transition-all active-scale"
+                          className="active-scale border-border hover:bg-surface-hover flex w-auto items-center gap-1 rounded-lg border bg-[#1e2d4a]/50 px-3.5 py-1.5 text-[12px] font-bold text-slate-300 transition-all"
                           onClick={() => onCopyZalo(bill, room.name, room.renterName)}
                         >
                           <Copy size={12} /> Zalo
@@ -232,7 +300,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                         {!bill.isPaid && (
                           <button
                             disabled={loading}
-                            className="w-auto px-3.5 py-1.5 text-[12px] font-bold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition-all active-scale disabled:opacity-50"
+                            className="active-scale w-auto rounded-lg bg-indigo-600 px-3.5 py-1.5 text-[12px] font-bold text-white transition-all hover:bg-indigo-700 disabled:opacity-50"
                             onClick={() => onPayBill(bill.id)}
                           >
                             {loading ? "Đang lưu..." : "Đã thu tiền"}
@@ -246,58 +314,59 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                   <div className="flex flex-col gap-2.5">
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="text-[11.5px] text-slate-400 block mb-1">Số Điện Mới (Cũ: {oldElectricity})</label>
+                        <label className="mb-1 block text-[11.5px] text-slate-400">Số Điện Mới (Cũ: {oldElectricity})</label>
                         <input
                           type="number"
+                          id={`elec-input-${room.id}`}
                           disabled={loading}
                           placeholder="Nhập số điện..."
                           value={inputs.newElectricity}
                           onChange={(e) => handleInputChange(room.id, "newElectricity", e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors disabled:opacity-50"
+                          className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
                         />
                       </div>
                       <div>
-                        <label className="text-[11.5px] text-slate-400 block mb-1">Số Nước Mới (Cũ: {oldWater})</label>
+                        <label className="mb-1 block text-[11.5px] text-slate-400">Số Nước Mới (Cũ: {oldWater})</label>
                         <input
                           type="number"
                           disabled={loading}
                           placeholder="Nhập số nước..."
                           value={inputs.newWater}
                           onChange={(e) => handleInputChange(room.id, "newWater", e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors disabled:opacity-50"
+                          className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="text-[11.5px] text-slate-400 block mb-1">Phát sinh riêng (đ)</label>
+                        <label className="mb-1 block text-[11.5px] text-slate-400">Phát sinh riêng (đ)</label>
                         <input
                           type="number"
                           disabled={loading}
                           placeholder="0"
                           value={inputs.extraAmount}
                           onChange={(e) => handleInputChange(room.id, "extraAmount", e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors disabled:opacity-50"
+                          className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
                         />
                       </div>
                       <div>
-                        <label className="text-[11.5px] text-slate-400 block mb-1">Lý do phát sinh</label>
+                        <label className="mb-1 block text-[11.5px] text-slate-400">Lý do phát sinh</label>
                         <input
                           type="text"
                           disabled={loading}
                           placeholder="Ví dụ: Thay khóa..."
                           value={inputs.extraDescription}
                           onChange={(e) => handleInputChange(room.id, "extraDescription", e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors disabled:opacity-50"
+                          className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none disabled:opacity-50"
                         />
                       </div>
                     </div>
 
                     <button
                       disabled={loading}
-                      className="w-full py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold mt-2 transition-colors active-scale disabled:opacity-50"
-                      onClick={() => onCreateBill(room.id, oldElectricity, oldWater)}
+                      className="active-scale mt-2 w-full rounded-lg bg-indigo-600 py-2.5 text-[13px] font-bold text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
+                      onClick={() => handleSubmitBill(room.id, oldElectricity, oldWater)}
                     >
                       {loading ? "Đang tính..." : "Lưu & Tính tiền phòng"}
                     </button>

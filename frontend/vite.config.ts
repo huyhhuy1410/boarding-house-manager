@@ -41,7 +41,7 @@ export default defineConfig({
         ]
       }
     })
-  ].filter(Boolean) as any,
+  ].filter(Boolean) as import('vite').PluginOption[],
   server: {
     port: 3005,
     proxy: {

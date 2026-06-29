@@ -6,19 +6,18 @@ import {
   updateExpenseSchema,
 } from "../schemas/expense.schema";
 
+import { authMiddleware } from "../middlewares/auth.middleware";
+
 const router = Router();
 const expenseController = new ExpenseController();
+
+// Áp dụng authMiddleware bảo vệ toàn bộ các endpoint bên dưới
+router.use(authMiddleware);
 
 /**
  * Route registry for expense management endpoints.
  */
-// TODO: Define routes for:
-// - POST / (validation middleware with createExpenseSchema, maps to expenseController.create)
-// - GET / (maps to expenseController.getAll)
-// - GET /summary (maps to expenseController.getSummary)
-// - GET /:id (maps to expenseController.getById)
-// - PUT /:id (validation middleware with updateExpenseSchema, maps to expenseController.update)
-// - DELETE /:id (maps to expenseController.destroy)
+
 router.post("/", validate(createExpenseSchema), expenseController.create);
 router.get("/", expenseController.getAll);
 router.get("/summary", expenseController.getSummary);

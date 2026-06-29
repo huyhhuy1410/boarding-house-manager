@@ -1,4 +1,5 @@
 import { PrismaClient, RoomStatus } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
@@ -8,6 +9,23 @@ async function main() {
   await prisma.expense.deleteMany({});
   await prisma.room.deleteMany({});
   await prisma.boardingHouse.deleteMany({});
+  await prisma.user.deleteMany({});
+
+  console.log("Đang tạo tài khoản mặc định (Default User)...");
+  // Giải thích: Chúng ta sử dụng bcryptjs để hash mật khẩu trước khi lưu vào DB trong file seed, 
+  // đảm bảo ngay cả tài khoản mẫu cũng được bảo mật đúng chuẩn và giống môi trường thực tế.
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash("password123", salt);
+  
+  const defaultUser = await prisma.user.create({
+    data: {
+      email: "admin@example.com",
+      password: hashedPassword,
+      name: "Chủ nhà",
+    },
+  });
+  console.log(`Đã tạo tài khoản mẫu: ${defaultUser.email} / mật khẩu: password123`);
+
 
   console.log("Đang tạo các Dãy trọ (Boarding Houses)...");
   

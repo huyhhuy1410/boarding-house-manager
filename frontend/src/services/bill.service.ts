@@ -1,5 +1,38 @@
-import axios from "axios";
+import api from "./api";
 import { Room } from "./room.service";
+
+/**
+ * RoomRaw dùng nội bộ trong bill.service: chỉ liệt kê các field Decimal
+ * mà backend gửi về dạng string. Không import từ room.service để tránh
+ * vòng lặp phụ thuộc — khai báo lại inline.
+ */
+interface RoomInBillRaw extends Omit<Room, "price" | "electricityPrice" | "waterPrice" | "internetPrice" | "trashPrice" | "renterDeposit" | "electricityDeposit" | "rentStartElectricity" | "rentStartWater" | "billingDay"> {
+  price: string | number;
+  electricityPrice: string | number;
+  waterPrice: string | number;
+  internetPrice: string | number;
+  trashPrice: string | number;
+  renterDeposit: string | number | null;
+  electricityDeposit: string | number;
+  rentStartElectricity: string | number;
+  rentStartWater: string | number;
+  billingDay: string | number;
+}
+
+/**
+ * BillRaw: kiểu dữ liệu thô từ API.
+ * Các field Decimal của Prisma sẽ được JSON serialize thành string.
+ */
+interface BillRaw extends Omit<Bill, "rentAmount" | "electricityAmount" | "waterAmount" | "internetAmount" | "trashAmount" | "extraAmount" | "totalAmount" | "room"> {
+  rentAmount: string | number;
+  electricityAmount: string | number;
+  waterAmount: string | number;
+  internetAmount: string | number;
+  trashAmount: string | number;
+  extraAmount: string | number;
+  totalAmount: string | number;
+  room?: RoomInBillRaw;
+}
 
 // Định nghĩa Interface Bill tại Frontend khớp với định dạng từ Backend trả về
 export interface Bill {
@@ -24,6 +57,7 @@ export interface Bill {
   paidAt: string | null;
 }
 
+
 export const billService = {
   /**
    * Tạo hóa đơn mới (tính toán tự động từ backend)
@@ -40,7 +74,7 @@ export const billService = {
     extraDescription?: string;
   }): Promise<Bill> => {
     try {
-      const response = await axios.post<any>("/api/bills", data);
+      const response = await api.post<BillRaw>("/api/bills", data);
       const bill = response.data;
       return {
         ...bill,
@@ -59,7 +93,10 @@ export const billService = {
           internetPrice: Number(bill.room.internetPrice),
           trashPrice: Number(bill.room.trashPrice),
           renterDeposit: bill.room.renterDeposit ? Number(bill.room.renterDeposit) : null,
-          electricityDeposit: bill.room.electricityDeposit ? Number(bill.room.electricityDeposit) : 0,
+          electricityDeposit: Number(bill.room.electricityDeposit),
+          rentStartElectricity: Number(bill.room.rentStartElectricity),
+          rentStartWater: Number(bill.room.rentStartWater),
+          billingDay: Number(bill.room.billingDay),
         } : undefined,
       };
     } catch (error) {
@@ -73,7 +110,7 @@ export const billService = {
    */
   getByPeriod: async (month: number, year: number): Promise<Bill[]> => {
     try {
-      const response = await axios.get<any[]>("/api/bills", {
+      const response = await api.get<BillRaw[]>("/api/bills", {
         params: { month, year },
       });
       return response.data.map(bill => ({
@@ -93,7 +130,10 @@ export const billService = {
           internetPrice: Number(bill.room.internetPrice),
           trashPrice: Number(bill.room.trashPrice),
           renterDeposit: bill.room.renterDeposit ? Number(bill.room.renterDeposit) : null,
-          electricityDeposit: bill.room.electricityDeposit ? Number(bill.room.electricityDeposit) : 0,
+          electricityDeposit: Number(bill.room.electricityDeposit),
+          rentStartElectricity: Number(bill.room.rentStartElectricity),
+          rentStartWater: Number(bill.room.rentStartWater),
+          billingDay: Number(bill.room.billingDay),
         } : undefined,
       }));
     } catch (error) {
@@ -107,7 +147,7 @@ export const billService = {
    */
   pay: async (id: string): Promise<Bill> => {
     try {
-      const response = await axios.patch<any>(`/api/bills/${id}/pay`);
+      const response = await api.patch<BillRaw>(`/api/bills/${id}/pay`);
       const bill = response.data;
       return {
         ...bill,
@@ -126,7 +166,10 @@ export const billService = {
           internetPrice: Number(bill.room.internetPrice),
           trashPrice: Number(bill.room.trashPrice),
           renterDeposit: bill.room.renterDeposit ? Number(bill.room.renterDeposit) : null,
-          electricityDeposit: bill.room.electricityDeposit ? Number(bill.room.electricityDeposit) : 0,
+          electricityDeposit: Number(bill.room.electricityDeposit),
+          rentStartElectricity: Number(bill.room.rentStartElectricity),
+          rentStartWater: Number(bill.room.rentStartWater),
+          billingDay: Number(bill.room.billingDay),
         } : undefined,
       };
     } catch (error) {

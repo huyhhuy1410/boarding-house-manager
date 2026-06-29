@@ -3,20 +3,16 @@ import { BillController } from "../controllers/bill.controller";
 import { validate } from "../middlewares/validation.middleware";
 import { createBillSchema } from "../schemas/bill.schema";
 
+import { authMiddleware } from "../middlewares/auth.middleware";
+
 const router = Router();
 const controller = new BillController();
 
-// POST /api/bills - Tạo hóa đơn mới (Validate qua Zod middleware trước)
-router.post(
-  "/",
-  validate(createBillSchema),
-  controller.createBill.bind(controller)
-);
+// Áp dụng authMiddleware bảo vệ toàn bộ các endpoint bên dưới
+router.use(authMiddleware);
 
-// GET /api/bills - Lấy danh sách hóa đơn theo tháng/năm (?month=6&year=2026)
-router.get("/", controller.getBills.bind(controller));
-
-// PATCH /api/bills/:id/pay - Đánh dấu hóa đơn đã thanh toán
-router.patch("/:id/pay", controller.payBill.bind(controller));
+router.post("/", validate(createBillSchema), controller.createBill);
+router.get("/", controller.getBills);
+router.patch("/:id/pay", controller.payBill);
 
 export default router;

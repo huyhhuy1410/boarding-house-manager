@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Room } from "../services/room.service";
 import { BoardingHouse } from "../services/room.service";
+import { useNotification } from "./NotificationProvider";
 
 interface RoomModalProps {
   show: boolean;
   editingRoom: Room | null;
   boardingHouses: BoardingHouse[];
   onClose: () => void;
-  onSave: (roomPayload: any) => Promise<void>;
+  onSave: (roomPayload: Omit<Room, "id" | "boardingHouse"> & { id?: string }) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   loading: boolean;
 }
@@ -21,6 +22,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
   onDelete,
   loading,
 }) => {
+  const { showToast } = useNotification();
   const [name, setName] = useState<string>("");
   const [boardingHouseId, setBoardingHouseId] = useState<string>("");
   const [price, setPrice] = useState<string>("");
@@ -86,7 +88,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !price.trim() || !boardingHouseId) {
-      alert("Vui lòng nhập đầy đủ tên phòng, giá thuê và chọn dãy trọ!");
+      showToast("Vui lòng nhập đầy đủ tên phòng, giá thuê và chọn dãy trọ!", "error");
       return;
     }
     const payload = {
@@ -112,47 +114,47 @@ export const RoomModal: React.FC<RoomModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/75 backdrop-blur-[3px] z-[2000] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/75 p-4 backdrop-blur-[3px]">
       <form
         onSubmit={handleSubmit}
-        className="bg-surface border border-border rounded-2xl w-full max-w-[420px] max-h-[90vh] overflow-y-auto p-6 flex flex-col gap-4 shadow-2xl"
+        className="border-border bg-surface flex max-h-[90vh] w-full max-w-[420px] flex-col gap-4 overflow-y-auto rounded-2xl border p-6 shadow-2xl"
       >
-        <div className="flex justify-between items-center border-b border-border pb-3.5">
+        <div className="border-border flex items-center justify-between border-b pb-3.5">
           <h3 className="text-[17px] font-bold text-slate-100">
             {editingRoom ? `Chỉnh sửa: ${editingRoom.name}` : "Thêm Phòng Trọ Mới"}
           </h3>
           <button
             type="button"
             onClick={onClose}
-            className="bg-transparent border-0 text-slate-400 hover:text-slate-200 text-xl cursor-pointer leading-none"
+            className="cursor-pointer border-0 bg-transparent text-xl leading-none text-slate-400 hover:text-slate-200"
           >
             ×
           </button>
         </div>
 
         {/* Thông tin cơ bản */}
-        <div className="flex flex-col gap-2.5 mt-1.5">
-          <h4 className="text-[12.5px] text-indigo-400 uppercase font-bold tracking-wider border-l-2 border-indigo-500 pl-2">
+        <div className="mt-1.5 flex flex-col gap-2.5">
+          <h4 className="border-l-2 border-indigo-500 pl-2 text-[12.5px] font-bold uppercase tracking-wider text-indigo-400">
             Thông tin cơ bản
           </h4>
           
           <div className="grid grid-cols-2 gap-2.5">
             <div>
-              <label className="text-[11.5px] text-slate-400 block mb-1">Tên phòng</label>
+              <label className="mb-1 block text-[11.5px] text-slate-400">Tên phòng</label>
               <input
                 type="text"
                 placeholder="Ví dụ: A1"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+                className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
               />
             </div>
             <div>
-              <label className="text-[11.5px] text-slate-400 block mb-1">Thuộc dãy trọ</label>
+              <label className="mb-1 block text-[11.5px] text-slate-400">Thuộc dãy trọ</label>
               <select
                 value={boardingHouseId}
                 onChange={(e) => setBoardingHouseId(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+                className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
               >
                 <option value="" disabled>-- Chọn dãy --</option>
                 {boardingHouses.map((house) => (
@@ -164,17 +166,17 @@ export const RoomModal: React.FC<RoomModalProps> = ({
 
           <div className="grid grid-cols-2 gap-2.5">
             <div>
-              <label className="text-[11.5px] text-slate-400 block mb-1">Giá thuê phòng (đ)</label>
+              <label className="mb-1 block text-[11.5px] text-slate-400">Giá thuê phòng (đ)</label>
               <input
                 type="number"
                 placeholder="Ví dụ: 3000000"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+                className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
               />
             </div>
             <div>
-              <label className="text-[11.5px] text-slate-400 block mb-1">Ngày chốt (1-31)</label>
+              <label className="mb-1 block text-[11.5px] text-slate-400">Ngày chốt (1-31)</label>
               <input
                 type="number"
                 min="1"
@@ -182,77 +184,77 @@ export const RoomModal: React.FC<RoomModalProps> = ({
                 placeholder="Mặc định: 30"
                 value={billingDay}
                 onChange={(e) => setBillingDay(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+                className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
               />
             </div>
           </div>
         </div>
 
         {/* Đơn giá dịch vụ */}
-        <div className="flex flex-col gap-2.5 mt-4">
-          <h4 className="text-[12.5px] text-indigo-400 uppercase font-bold tracking-wider border-l-2 border-indigo-500 pl-2">
+        <div className="mt-4 flex flex-col gap-2.5">
+          <h4 className="border-l-2 border-indigo-500 pl-2 text-[12.5px] font-bold uppercase tracking-wider text-indigo-400">
             Đơn giá dịch vụ
           </h4>
           
           <div className="grid grid-cols-2 gap-2.5">
             <div>
-              <label className="text-[11.5px] text-slate-400 block mb-1">Điện (đ/kWh)</label>
+              <label className="mb-1 block text-[11.5px] text-slate-400">Điện (đ/kWh)</label>
               <input
                 type="number"
                 placeholder="3500"
                 value={electricityPrice}
                 onChange={(e) => setElectricityPrice(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+                className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
               />
             </div>
             <div>
-              <label className="text-[11.5px] text-slate-400 block mb-1">Nước (đ/m3)</label>
+              <label className="mb-1 block text-[11.5px] text-slate-400">Nước (đ/m3)</label>
               <input
                 type="number"
                 placeholder="15000"
                 value={waterPrice}
                 onChange={(e) => setWaterPrice(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+                className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2.5">
             <div>
-              <label className="text-[11.5px] text-slate-400 block mb-1">Internet/phòng (đ)</label>
+              <label className="mb-1 block text-[11.5px] text-slate-400">Internet/phòng (đ)</label>
               <input
                 type="number"
                 placeholder="100000"
                 value={internetPrice}
                 onChange={(e) => setInternetPrice(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+                className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
               />
             </div>
             <div>
-              <label className="text-[11.5px] text-slate-400 block mb-1">Rác thải/phòng (đ)</label>
+              <label className="mb-1 block text-[11.5px] text-slate-400">Rác thải/phòng (đ)</label>
               <input
                 type="number"
                 placeholder="20000"
                 value={trashPrice}
                 onChange={(e) => setTrashPrice(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+                className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
               />
             </div>
           </div>
         </div>
 
         {/* Trạng thái & Khách thuê */}
-        <div className="flex flex-col gap-2.5 mt-4">
-          <h4 className="text-[12.5px] text-indigo-400 uppercase font-bold tracking-wider border-l-2 border-indigo-500 pl-2">
+        <div className="mt-4 flex flex-col gap-2.5">
+          <h4 className="border-l-2 border-indigo-500 pl-2 text-[12.5px] font-bold uppercase tracking-wider text-indigo-400">
             Trạng thái & Khách thuê
           </h4>
           
           <div>
-            <label className="text-[11.5px] text-slate-400 block mb-1">Trạng thái phòng</label>
+            <label className="mb-1 block text-[11.5px] text-slate-400">Trạng thái phòng</label>
             <select
               value={status}
-              onChange={(e) => setStatus(e.target.value as any)}
-              className="w-full px-3 py-2 rounded-lg border border-border bg-[#0b0f19] text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+              onChange={(e) => setStatus(e.target.value as Room["status"])}
+              className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
             >
               <option value="VACANT">Phòng trống</option>
               <option value="OCCUPIED">Đang thuê</option>
@@ -261,47 +263,47 @@ export const RoomModal: React.FC<RoomModalProps> = ({
           </div>
 
           {status === "OCCUPIED" && (
-            <div className="flex flex-col gap-2.5 p-3 rounded-xl bg-[#0b0f19] border border-border border-dashed">
+            <div className="border-border bg-bg flex flex-col gap-2.5 rounded-xl border border-dashed p-3">
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="text-[11px] text-slate-400 block mb-1">Tên khách thuê</label>
+                  <label className="mb-1 block text-[11px] text-slate-400">Tên khách thuê</label>
                   <input
                     type="text"
                     placeholder="Nguyễn Văn A"
                     value={renterName}
                     onChange={(e) => setRenterName(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+                    className="border-border bg-surface w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] text-slate-400 block mb-1">Số điện thoại</label>
+                  <label className="mb-1 block text-[11px] text-slate-400">Số điện thoại</label>
                   <input
                     type="text"
                     placeholder="090..."
                     value={renterPhone}
                     onChange={(e) => setRenterPhone(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+                    className="border-border bg-surface w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="text-[11px] text-slate-400 block mb-1">Cọc phòng (đ)</label>
+                  <label className="mb-1 block text-[11px] text-slate-400">Cọc phòng (đ)</label>
                   <input
                     type="number"
                     value={renterDeposit}
                     onChange={(e) => setRenterDeposit(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+                    className="border-border bg-surface w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] text-slate-400 block mb-1">Cọc điện gối (đ)</label>
+                  <label className="mb-1 block text-[11px] text-slate-400">Cọc điện gối (đ)</label>
                   <input
                     type="number"
                     value={electricityDeposit}
                     onChange={(e) => setElectricityDeposit(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+                    className="border-border bg-surface w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -312,43 +314,43 @@ export const RoomModal: React.FC<RoomModalProps> = ({
                   id="modalIsElecInc"
                   checked={isElectricityIncluded}
                   onChange={(e) => setIsElectricityIncluded(e.target.checked)}
-                  className="rounded border-border text-indigo-600 focus:ring-0 focus:ring-offset-0 bg-[#0b0f19] cursor-pointer"
+                  className="border-border bg-bg cursor-pointer rounded text-indigo-600 focus:ring-0 focus:ring-offset-0"
                 />
                 <label
                   htmlFor="modalIsElecInc"
-                  className="text-[11.5px] text-slate-400 cursor-pointer select-none"
+                  className="cursor-pointer select-none text-[11.5px] text-slate-400"
                 >
                   Bao tiền điện (cho 3 Trời)
                 </label>
               </div>
 
               <div>
-                <label className="text-[11px] text-slate-400 block mb-1">Ngày bắt đầu thuê</label>
+                <label className="mb-1 block text-[11px] text-slate-400">Ngày bắt đầu thuê</label>
                 <input
                   type="date"
                   value={rentStartDate}
                   onChange={(e) => setRentStartDate(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors appearance-none min-h-[38px]"
+                  className="border-border bg-surface min-h-[38px] w-full appearance-none rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="text-[11px] text-slate-400 block mb-1">Số điện đầu</label>
+                  <label className="mb-1 block text-[11px] text-slate-400">Số điện đầu</label>
                   <input
                     type="number"
                     value={rentStartElectricity}
                     onChange={(e) => setRentStartElectricity(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+                    className="border-border bg-surface w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] text-slate-400 block mb-1">Số nước đầu</label>
+                  <label className="mb-1 block text-[11px] text-slate-400">Số nước đầu</label>
                   <input
                     type="number"
                     value={rentStartWater}
                     onChange={(e) => setRentStartWater(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-slate-100 text-[13px] focus:outline-none focus:border-indigo-500 transition-colors"
+                    className="border-border bg-surface w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -357,13 +359,13 @@ export const RoomModal: React.FC<RoomModalProps> = ({
         </div>
 
         {/* Buttons điều hướng */}
-        <div className="flex gap-2.5 mt-5 border-t border-border pt-4">
+        <div className="border-border mt-5 flex gap-2.5 border-t pt-4">
           {editingRoom && (
             <button
               type="button"
               disabled={loading}
               onClick={() => onDelete(editingRoom.id)}
-              className="px-3.5 py-2.5 rounded-xl bg-red-950/40 border border-red-900/60 hover:bg-red-900/60 text-red-400 text-[13px] font-bold transition-colors active-scale whitespace-nowrap"
+              className="active-scale whitespace-nowrap rounded-xl border border-red-900/60 bg-red-950/40 px-3.5 py-2.5 text-[13px] font-bold text-red-400 transition-colors hover:bg-red-900/60"
             >
               {loading ? "Đang xóa..." : "Xóa"}
             </button>
@@ -372,14 +374,14 @@ export const RoomModal: React.FC<RoomModalProps> = ({
             type="button"
             disabled={loading}
             onClick={onClose}
-            className="flex-1 py-2.5 rounded-xl border border-border text-slate-400 hover:bg-slate-800/40 text-[13px] transition-colors active-scale"
+            className="active-scale border-border flex-1 rounded-xl border py-2.5 text-[13px] text-slate-400 transition-colors hover:bg-slate-800/40"
           >
             Hủy
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="flex-[2] py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition-colors active-scale"
+            className="active-scale flex-[2] rounded-xl bg-indigo-600 py-2.5 text-[13px] font-bold text-white transition-colors hover:bg-indigo-700"
           >
             {loading ? "Đang lưu..." : "Lưu lại"}
           </button>

@@ -10,10 +10,11 @@ const app: Application = express();
 import path from "path";
 import roomRouter from "./routes/room.route";
 import billRouter from "./routes/bill.route";
-// TODO: Import telegramRouter from './routes/telegram.route'
 import telegramRouter from "./routes/telegram.route";
-// TODO: Import expenseRouter from "./routes/expense.route"
 import expenseRouter from "./routes/expense.route";
+import authRouter from "./routes/auth.route";
+import boardingHouseRouter from "./routes/boardingHouse.route";
+
 import { errorHandler } from "./middlewares/error.middleware";
 // Middlewares
 app.use(cors());
@@ -21,10 +22,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Đăng ký Router
+app.use("/api/auth", authRouter);
 app.use("/api/rooms", roomRouter);
 app.use("/api/bills", billRouter);
 app.use("/api/telegram", telegramRouter);
 app.use("/api/expenses", expenseRouter);
+app.use("/api/boarding-houses", boardingHouseRouter);
 
 // Health check route
 app.get("/health", (req: Request, res: Response) => {

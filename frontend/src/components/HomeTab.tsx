@@ -27,6 +27,7 @@ interface HomeTabProps {
   selectedMonth: number;
   selectedYear: number;
   formatCurrency: (val: number) => string;
+  loading?: boolean;
 }
 
 export const HomeTab: React.FC<HomeTabProps> = ({
@@ -36,6 +37,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   selectedMonth,
   selectedYear,
   formatCurrency,
+  loading = false,
 }) => {
   // Tính toán nhanh số liệu thống kê
   const occupiedRooms = rooms.filter((r) => r.status === "OCCUPIED").length;
@@ -61,12 +63,56 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     return value.toString();
   };
 
+  if (loading && rooms.length === 0) {
+    return (
+      <>
+        {/* SKELETON BIỂU ĐỒ */}
+        <section className="border-border bg-surface flex animate-pulse flex-col gap-2.5 rounded-2xl border p-4">
+          <div className="h-3 w-16 rounded-md bg-slate-800"></div>
+          <div className="mt-1 h-5 w-48 rounded-md bg-slate-800"></div>
+          <div className="mt-4 h-[200px] w-full rounded-xl bg-slate-800/40"></div>
+        </section>
+
+        {/* SKELETON THỐNG KÊ NHANH (STATS GRID) */}
+        <section className="grid grid-cols-2 gap-3">
+          {Array.from({ length: 4 }).map((_, idx) => (
+            <div key={idx} className="border-border bg-surface flex animate-pulse items-center gap-3 rounded-2xl border p-4">
+              <div className="size-9 shrink-0 rounded-xl bg-slate-800"></div>
+              <div className="flex flex-1 flex-col gap-1.5">
+                <div className="h-3 w-16 rounded-md bg-slate-800"></div>
+                <div className="h-4 w-20 rounded-md bg-slate-800"></div>
+              </div>
+            </div>
+          ))}
+        </section>
+
+        {/* SKELETON CHI PHÍ GẦN NHẤT */}
+        <section className="border-border bg-surface animate-pulse overflow-hidden rounded-2xl border">
+          <div className="border-border border-b px-4 pb-3 pt-4">
+            <div className="h-3.5 w-40 rounded-md bg-slate-800"></div>
+          </div>
+          <div className="divide-border/50 flex flex-col divide-y">
+            {Array.from({ length: 3 }).map((_, idx) => (
+              <div key={idx} className="bg-surface/50 flex items-center justify-between px-4 py-3">
+                <div className="flex w-1/2 flex-col gap-1.5">
+                  <div className="h-4 w-28 rounded-md bg-slate-800"></div>
+                  <div className="h-3 w-20 rounded-md bg-slate-800"></div>
+                </div>
+                <div className="h-4 w-12 rounded-md bg-slate-800"></div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </>
+    );
+  }
+
   return (
     <>
       {/* BIỂU ĐỒ DOANH THU & CHI PHÍ SỬA CHỮA */}
-      <section className="flex flex-col gap-2.5 bg-surface border border-border p-4 rounded-2xl">
+      <section className="border-border bg-surface flex flex-col gap-2.5 rounded-2xl border p-4">
         <div className="flex flex-col gap-0.5">
-          <span className="text-[11px] text-slate-500 uppercase tracking-widest font-medium">
+          <span className="text-[11px] font-medium uppercase tracking-widest text-slate-500">
             Dòng tiền
           </span>
           <h3 className="text-[15px] font-bold text-slate-100">
@@ -74,7 +120,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           </h3>
         </div>
 
-        <div className="w-full h-[200px] mt-2">
+        <div className="mt-2 h-[200px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={chartData}
@@ -107,84 +153,84 @@ export const HomeTab: React.FC<HomeTabProps> = ({
 
       {/* THỐNG KÊ NHANH (STATS GRID) */}
       <section className="grid grid-cols-2 gap-3">
-        <div className="bg-surface border border-border p-4 rounded-2xl flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-indigo-950/50 text-indigo-400">
+        <div className="border-border bg-surface flex items-center gap-3 rounded-2xl border p-4">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-indigo-950/50 text-indigo-400">
             <Calendar size={18} />
           </div>
           <div>
-            <span className="text-[11.5px] text-slate-400 block">Tháng hiện tại</span>
-            <span className="text-[15px] font-bold text-slate-100 block">Tháng {selectedMonth}/{selectedYear}</span>
+            <span className="block text-[11.5px] text-slate-400">Tháng hiện tại</span>
+            <span className="block text-[15px] font-bold text-slate-100">Tháng {selectedMonth}/{selectedYear}</span>
           </div>
         </div>
 
-        <div className="bg-surface border border-border p-4 rounded-2xl flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-emerald-950/50 text-emerald-400">
+        <div className="border-border bg-surface flex items-center gap-3 rounded-2xl border p-4">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-emerald-950/50 text-emerald-400">
             <DollarSign size={18} />
           </div>
           <div>
-            <span className="text-[11.5px] text-slate-400 block">Tổng tiền thuê</span>
-            <span className="text-[15px] font-bold text-slate-100 block">{formatCurrency(totalRentAmount)}</span>
+            <span className="block text-[11.5px] text-slate-400">Tổng tiền thuê</span>
+            <span className="block text-[15px] font-bold text-slate-100">{formatCurrency(totalRentAmount)}</span>
           </div>
         </div>
 
-        <div className="bg-surface border border-border p-4 rounded-2xl flex items-center gap-3 col-span-2">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-amber-950/50 text-amber-400">
+        <div className="border-border bg-surface col-span-2 flex items-center gap-3 rounded-2xl border p-4">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-amber-950/50 text-amber-400">
             <Activity size={18} />
           </div>
           <div>
-            <span className="text-[11.5px] text-slate-400 block">Chi phí sửa chữa</span>
-            <span className="text-[15px] font-bold text-slate-100 block">{formatCurrency(totalExpensesAmount)}</span>
+            <span className="block text-[11.5px] text-slate-400">Chi phí sửa chữa</span>
+            <span className="block text-[15px] font-bold text-slate-100">{formatCurrency(totalExpensesAmount)}</span>
           </div>
         </div>
 
-        <div className="bg-surface border border-border p-4 rounded-2xl flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-emerald-950/50 text-emerald-400">
+        <div className="border-border bg-surface flex items-center gap-3 rounded-2xl border p-4">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-emerald-950/50 text-emerald-400">
             <CheckCircle2 size={18} />
           </div>
           <div>
-            <span className="text-[11.5px] text-slate-400 block">Đã đóng tiền</span>
-            <span className="text-[15px] font-bold text-slate-100 block">{paidRoomsCount} phòng</span>
+            <span className="block text-[11.5px] text-slate-400">Đã đóng tiền</span>
+            <span className="block text-[15px] font-bold text-slate-100">{paidRoomsCount} phòng</span>
           </div>
         </div>
 
-        <div className="bg-surface border border-border p-4 rounded-2xl flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-red-950/50 text-red-400">
+        <div className="border-border bg-surface flex items-center gap-3 rounded-2xl border p-4">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-red-950/50 text-red-400">
             <AlertCircle size={18} />
           </div>
           <div>
-            <span className="text-[11.5px] text-slate-400 block">Chưa đóng tiền</span>
-            <span className="text-[15px] font-bold text-slate-100 block">{unpaidRooms} phòng</span>
+            <span className="block text-[11.5px] text-slate-400">Chưa đóng tiền</span>
+            <span className="block text-[15px] font-bold text-slate-100">{unpaidRooms} phòng</span>
           </div>
         </div>
       </section>
 
       {/* Chi phí phát sinh gần nhất */}
-      <section className="bg-surface border border-border rounded-2xl overflow-hidden">
-        <div className="px-4 pt-4 pb-3 border-b border-border">
-          <h4 className="text-[12px] text-slate-500 uppercase tracking-widest font-medium">
+      <section className="border-border bg-surface overflow-hidden rounded-2xl border">
+        <div className="border-border border-b px-4 pb-3 pt-4">
+          <h4 className="text-[12px] font-medium uppercase tracking-widest text-slate-500">
             Chi phí phát sinh gần nhất
           </h4>
         </div>
         {expenses.length === 0 ? (
-          <div className="text-center text-slate-400 py-8 px-4 text-[13px]">
+          <div className="px-4 py-8 text-center text-[13px] text-slate-400">
             Chưa có chi phí nào phát sinh.
           </div>
         ) : (
-          <div className="flex flex-col divide-y divide-border">
+          <div className="divide-border flex flex-col divide-y">
             {expenses.slice(0, 5).map((exp) => (
               <div
                 key={exp.id}
-                className="flex justify-between items-center px-4 py-3"
+                className="flex items-center justify-between px-4 py-3"
               >
                 <div>
                   <div className="text-[13.5px] font-medium text-slate-100">
                     {exp.title}
                   </div>
-                  <div className="text-[11.5px] text-slate-400 mt-0.5">
+                  <div className="mt-0.5 text-[11.5px] text-slate-400">
                     Phạm vi: {exp.room?.name || "Chung"} • {new Date(exp.date).toLocaleDateString("vi-VN")}
                   </div>
                 </div>
-                <div className="font-bold text-amber-500 text-[14px] shrink-0 ml-3">
+                <div className="ml-3 shrink-0 text-[14px] font-bold text-amber-500">
                   -{formatCurrency(exp.amount)}
                 </div>
               </div>

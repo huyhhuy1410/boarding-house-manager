@@ -2,29 +2,53 @@ import { useState, useEffect } from "react";
 import { Home, Layers, FileText, Wrench } from "lucide-react";
 
 // Services
+import { boardingHouseService } from "./services/boardingHouse.service";
 import { roomService, Room, BoardingHouse } from "./services/room.service";
 import { billService, Bill } from "./services/bill.service";
-import { expenseService, Expense, FinancialSummary } from "./services/expense.service";
+import {
+  expenseService,
+  Expense,
+  FinancialSummary,
+} from "./services/expense.service";
 
 // Components
 import { HomeTab } from "./components/HomeTab";
 import { RoomsTab } from "./components/RoomsTab";
 import { BillingTab } from "./components/BillingTab";
 import { ExpensesTab } from "./components/ExpensesTab";
+import { BoardingHouseModal } from "./components/BoardingHouseModal";
 import { RoomModal } from "./components/RoomModal";
+import { Login } from "./components/Login";
+
+// Auth
+import { authService, User } from "./services/auth.service";
+
+// Notification Context
+import { useNotification } from "./components/NotificationProvider";
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<"home" | "rooms" | "billing" | "expenses">("home");
+  const { showToast, showConfirm } = useNotification();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
+    authService.isAuthenticated(),
+  );
+  const [currentUser, setCurrentUser] = useState<User | null>(
+    authService.getCurrentUser(),
+  );
+  const [activeTab, setActiveTab] = useState<
+    "home" | "rooms" | "billing" | "expenses"
+  >("home");
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   // States dữ liệu
+  const [showBHModal, setShowBHModal] = useState<boolean>(false);
+  const [editingBH, setEditingBH] = useState<BoardingHouse | null>(null);
   const [rooms, setRooms] = useState<Room[]>([]);
   const [boardingHouses, setBoardingHouses] = useState<BoardingHouse[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [chartData, setChartData] = useState<FinancialSummary[]>([]);
   const [bills, setBills] = useState<Bill[]>([]);
-  
+
   // Mặc định chạy trong tháng 6/2026 cho dữ liệu chạy thử
   const [selectedMonth] = useState<number>(6);
   const [selectedYear] = useState<number>(2026);
@@ -60,8 +84,15 @@ export default function App() {
   const fetchRoomsAndBills = async () => {
     try {
       setLoading(true);
-      const roomsData = await roomService.getAll();
-      const billsData = await billService.getByPeriod(selectedMonth, selectedYear);
+      const [roomsData, bhData] = await Promise.all([
+        roomService.getAll(),
+        boardingHouseService.getAll(),
+      ]);
+      setBoardingHouses(bhData);
+      const billsData = await billService.getByPeriod(
+        selectedMonth,
+        selectedYear,
+      );
       setBills(billsData);
 
       // Trích xuất danh sách các dãy trọ duy nhất từ danh sách phòng
@@ -90,7 +121,7 @@ export default function App() {
       setChartData(summaryData);
 
       setError(null);
-    } catch (err: any) {
+    } catch (err) {
       setError("Không thể kết nối đến máy chủ API. Vui lòng kiểm tra lại!");
     } finally {
       setLoading(false);
@@ -98,8 +129,15 @@ export default function App() {
   };
 
   useEffect(() => {
-    fetchRoomsAndBills();
-  }, [selectedMonth, selectedYear]);
+    if (isAuthenticated) {
+      fetchRoomsAndBills();
+    }
+  }, [selectedMonth, selectedYear, isAuthenticated]);
+
+  const handleLoginSuccess = (user: User) => {
+    setCurrentUser(user);
+    setIsAuthenticated(true);
+  };
 
   // Tiện ích format tiền tệ VND
   const formatCurrency = (val: number) => {
@@ -129,11 +167,11 @@ export default function App() {
       const extraDescription = inputs.extraDescription;
 
       if (isNaN(newElectricity) || inputs.newElectricity === "") {
-        alert("Vui lòng nhập số điện mới hợp lệ!");
+        showToast("Vui lòng nhập số điện mới hợp lệ!", "error");
         return;
       }
       if (isNaN(newWater) || inputs.newWater === "") {
-        alert("Vui lòng nhập số nước mới hợp lệ!");
+        showToast("Vui lòng nhập số nước mới hợp lệ!", "error");
         return;
       }
 
@@ -172,9 +210,17 @@ export default function App() {
       }));
 
       await fetchRoomsAndBills();
-    } catch (err: any) {
-      const msg = err.response?.data?.message || err.message || "Không thể tạo hóa đơn!";
-      alert("Lỗi: " + msg);
+      showToast("Đã tạo hóa đơn thành công!");
+    } catch (err) {
+      const errorResponse = err as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
+      const msg =
+        errorResponse.response?.data?.message ||
+        errorResponse.message ||
+        "Không thể tạo hóa đơn!";
+      showToast("Lỗi: " + msg, "error");
     } finally {
       setLoading(false);
     }
@@ -186,9 +232,17 @@ export default function App() {
       setLoading(true);
       await billService.pay(billId);
       await fetchRoomsAndBills();
-    } catch (err: any) {
-      const msg = err.response?.data?.message || err.message || "Không thể thanh toán!";
-      alert("Lỗi: " + msg);
+      showToast("Đã cập nhật thanh toán hóa đơn!");
+    } catch (err) {
+      const errorResponse = err as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
+      const msg =
+        errorResponse.response?.data?.message ||
+        errorResponse.message ||
+        "Không thể thanh toán!";
+      showToast("Lỗi: " + msg, "error");
     } finally {
       setLoading(false);
     }
@@ -198,7 +252,7 @@ export default function App() {
   const handleCreateExpense = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!expenseTitle.trim() || !expenseAmount.trim()) {
-      alert("Vui lòng nhập đầy đủ tên chi phí và số tiền!");
+      showToast("Vui lòng nhập đầy đủ tên chi phí và số tiền!", "error");
       return;
     }
     try {
@@ -215,8 +269,17 @@ export default function App() {
       setExpenseRoomId("chung");
       setShowExpenseForm(false);
       await fetchRoomsAndBills();
-    } catch (err: any) {
-      alert("Lỗi: " + (err.response?.data?.error || err.message));
+      showToast("Đã lưu chi phí phát sinh!");
+    } catch (err) {
+      const errorResponse = err as {
+        response?: { data?: { error?: string } };
+        message?: string;
+      };
+      showToast(
+        "Lỗi: " +
+          (errorResponse.response?.data?.error || errorResponse.message),
+        "error",
+      );
     } finally {
       setLoading(false);
     }
@@ -224,16 +287,26 @@ export default function App() {
 
   // Xóa chi phí bảo trì
   const handleDeleteExpense = async (id: string) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa chi phí này?")) return;
-    try {
-      setLoading(true);
-      await expenseService.delete(id);
-      await fetchRoomsAndBills();
-    } catch (err: any) {
-      alert("Lỗi khi xóa: " + (err.response?.data?.error || err.message));
-    } finally {
-      setLoading(false);
-    }
+    showConfirm("Bạn có chắc chắn muốn xóa chi phí này?", async () => {
+      try {
+        setLoading(true);
+        await expenseService.delete(id);
+        await fetchRoomsAndBills();
+        showToast("Đã xóa chi phí thành công!");
+      } catch (err) {
+        const errorResponse = err as {
+          response?: { data?: { error?: string } };
+          message?: string;
+        };
+        showToast(
+          "Lỗi khi xóa: " +
+            (errorResponse.response?.data?.error || errorResponse.message),
+          "error",
+        );
+      } finally {
+        setLoading(false);
+      }
+    });
   };
 
   // Sao chép tin nhắn mẫu biên lai gửi qua Zalo/iMessage
@@ -268,10 +341,10 @@ Khách thuê: ${renterName || "Chưa cập nhật"}
 ${Number(bill.extraAmount) > 0 ? `6. Chi phí phát sinh (${bill.extraDescription || "Sửa thiết bị"}): +${formattedExtra}\n` : ""}---------------------------------------
 => TỔNG CỘNG CẦN THANH TOÁN: ${formattedTotal}
 ---------------------------------------
-Parker cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
+Xin cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
 
     navigator.clipboard.writeText(message);
-    alert(`Đã sao chép mẫu biên lai phòng ${roomName} vào bộ nhớ tạm! Bạn có thể dán trực tiếp gửi qua Zalo/Viber.`);
+    showToast(`Đã sao chép mẫu biên lai phòng ${roomName}!`);
   };
 
   // Trình kích hoạt mở Modal Thêm phòng trọ
@@ -287,18 +360,30 @@ Parker cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
   };
 
   // Lưu thông tin phòng trọ (Tạo mới & Cập nhật)
-  const handleSaveRoom = async (roomPayload: any) => {
+  const handleSaveRoom = async (
+    roomPayload: Omit<Room, "id" | "boardingHouse"> & { id?: string },
+  ) => {
     try {
       setLoading(true);
       if (editingRoom) {
         await roomService.update(editingRoom.id, roomPayload);
+        showToast("Đã cập nhật thông tin phòng!");
       } else {
         await roomService.create(roomPayload);
+        showToast("Đã thêm phòng trọ mới!");
       }
       setShowRoomModal(false);
       await fetchRoomsAndBills();
-    } catch (err: any) {
-      alert("Lỗi khi lưu phòng: " + (err.response?.data?.error || err.message));
+    } catch (err) {
+      const errorResponse = err as {
+        response?: { data?: { error?: string } };
+        message?: string;
+      };
+      showToast(
+        "Lỗi khi lưu phòng: " +
+          (errorResponse.response?.data?.error || errorResponse.message),
+        "error",
+      );
     } finally {
       setLoading(false);
     }
@@ -306,44 +391,132 @@ Parker cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
 
   // Xóa phòng trọ
   const handleDeleteRoom = async (id: string) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa phòng trọ này? Tất cả hóa đơn liên quan cũng sẽ bị xóa vĩnh viễn!")) return;
+    showConfirm(
+      "Bạn có chắc chắn muốn xóa phòng trọ này? Tất cả hóa đơn liên quan cũng sẽ bị xóa vĩnh viễn!",
+      async () => {
+        try {
+          setLoading(true);
+          await roomService.delete(id);
+          setShowRoomModal(false); // Đóng modal sau khi xóa thành công
+          await fetchRoomsAndBills();
+          showToast("Đã xóa phòng trọ thành công!");
+        } catch (err) {
+          const errorResponse = err as {
+            response?: { data?: { error?: string } };
+            message?: string;
+          };
+          showToast(
+            "Lỗi khi xóa: " +
+              (errorResponse.response?.data?.error || errorResponse.message),
+            "error",
+          );
+        } finally {
+          setLoading(false);
+        }
+      },
+    );
+  };
+  // Mở modal thêm mới dãy trọ
+  const handleOpenAddBH = () => {
+    setEditingBH(null);
+    setShowBHModal(true);
+  };
+
+  // Mở modal chỉnh sửa dãy trọ (ví dụ sửa dãy hiện tại đang chọn)
+  const handleOpenEditBH = (bh: BoardingHouse) => {
+    setEditingBH(bh);
+    setShowBHModal(true);
+  };
+  // Hàm Lưu Dãy trọ
+  const handleSaveBoardingHouse = async (
+    payload: Omit<BoardingHouse, "id"> & { id?: string },
+  ) => {
     try {
       setLoading(true);
-      await roomService.delete(id);
-      setShowRoomModal(false); // Đóng modal sau khi xóa thành công
+      if (editingBH) {
+        await boardingHouseService.update(editingBH.id, payload.name);
+        showToast("Đã cập nhật tên dãy trọ!");
+      } else {
+        await boardingHouseService.create(payload.name);
+        showToast("Đã thêm dãy trọ mới!");
+      }
+      setShowBHModal(false);
       await fetchRoomsAndBills();
-    } catch (err: any) {
-      alert("Lỗi khi xóa phòng: " + (err.response?.data?.error || err.message));
+    } catch (err) {
+      const e = err as {
+        response?: { data?: { error?: string } };
+        message?: string;
+      };
+      showToast(
+        "Lỗi khi lưu dãy trọ: " + (e.response?.data?.error || e.message),
+        "error",
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  // Hàm Xóa Dãy trọ
+  const handleDeleteBoardingHouse = async (id: string) => {
+    showConfirm(
+      "Bạn có chắc chắn muốn xóa dãy trọ này? Thao tác này không thể hoàn tác!",
+      async () => {
+        try {
+          setLoading(true);
+          await boardingHouseService.delete(id);
+          setShowBHModal(false);
+          await fetchRoomsAndBills();
+          showToast("Đã xóa dãy trọ thành công!");
+        } catch (err) {
+          const e = err as {
+            response?: { data?: { error?: string } };
+            message?: string;
+          };
+          showToast(
+            "Lỗi khi xóa: " + (e.response?.data?.error || e.message),
+            "error",
+          );
+        } finally {
+          setLoading(false);
+        }
+      },
+    );
+  };
+  if (!isAuthenticated) {
+    return <Login onLoginSuccess={handleLoginSuccess} />;
+  }
+
   return (
-    <div className="max-w-[480px] mx-auto px-4 pt-4 flex flex-col gap-4">
+    <div className="mx-auto flex max-w-[480px] flex-col gap-4 px-4 pt-4">
       {/* 1. APP HEADER */}
-      <header className="flex justify-between items-center pt-1 pb-2">
+      <header className="flex items-center justify-between border-b border-border/40 pb-2 pt-1">
         <div>
-          <h1 className="text-[22px] font-extrabold bg-gradient-to-r from-white to-indigo-200 bg-clip-text text-transparent leading-tight">
+          <h1 className="bg-gradient-to-r from-white to-indigo-200 bg-clip-text text-[22px] font-extrabold leading-tight text-transparent">
             Quản Lý Trọ Việt
           </h1>
-          <p className="text-[12px] text-slate-500 mt-0.5 tracking-wide">
-            Hệ thống hỗ trợ chốt phòng di động
+          <p className="mt-0.5 text-[12px] tracking-wide text-slate-500">
+            Chào {currentUser?.name || "Chủ nhà"}
           </p>
         </div>
+        <button
+          onClick={authService.logout}
+          className="active-scale cursor-pointer rounded-lg border border-border bg-[#1e293b] px-3 py-1.5 text-[11px] font-medium text-slate-300 transition-colors hover:bg-red-950/40 hover:text-red-400"
+        >
+          Đăng xuất
+        </button>
       </header>
 
       {/* ERROR MESSAGE NOTIFICATION */}
       {error && (
-        <div className="bg-red-950/40 text-red-400 p-3.5 rounded-xl border border-red-900/60 text-[13px] mb-4 text-center">
+        <div className="mb-4 rounded-xl border border-red-900/60 bg-red-950/40 p-3.5 text-center text-[13px] text-red-400">
           {error}
         </div>
       )}
 
       {/* MAIN CONTAINER CONTENT VIEW */}
-      <main className="pb-24 flex flex-col gap-4">
+      <main className="flex flex-col gap-4 pb-24">
         {loading && (
-          <div className="fixed top-5 left-1/2 -translate-x-1/2 bg-indigo-600 text-white px-3.5 py-1.5 rounded-full text-[11.5px] font-bold z-[9999] shadow-lg">
+          <div className="fixed left-1/2 top-5 z-[9999] -translate-x-1/2 rounded-full bg-indigo-600 px-3.5 py-1.5 text-[11.5px] font-bold text-white shadow-lg">
             Đang tải dữ liệu...
           </div>
         )}
@@ -357,6 +530,7 @@ Parker cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
             selectedMonth={selectedMonth}
             selectedYear={selectedYear}
             formatCurrency={formatCurrency}
+            loading={loading}
           />
         )}
 
@@ -371,6 +545,18 @@ Parker cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
             onAddRoomClick={handleOpenAddRoom}
             onRoomClick={handleOpenEditRoom}
             formatCurrency={formatCurrency}
+            loading={loading}
+            onManageBHClick={() => {
+              // Tìm dãy trọ hiện tại đang lọc để sửa, hoặc nếu đang chọn "Tất cả" thì mở modal tạo mới
+              const currentBH = boardingHouses.find(
+                (bh) => bh.id === roomFilter,
+              );
+              if (currentBH) {
+                handleOpenEditBH(currentBH);
+              } else {
+                handleOpenAddBH();
+              }
+            }}
           />
         )}
 
@@ -415,6 +601,19 @@ Parker cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
         )}
       </main>
 
+      {/* MODAL QUẢN LÝ DÃY TRỌ (POPUP MODAL) */}
+      <BoardingHouseModal
+        show={showBHModal}
+        editingBoardingHouse={editingBH}
+        boardingHouses={boardingHouses}
+        onClose={() => {
+          setShowBHModal(false);
+          setEditingBH(null);
+        }}
+        onSave={handleSaveBoardingHouse}
+        onDelete={handleDeleteBoardingHouse}
+        loading={loading}
+      />
       {/* MODAL CẤU HÌNH PHÒNG TRỌ (POPUP MODAL) */}
       <RoomModal
         show={showRoomModal}
@@ -427,41 +626,49 @@ Parker cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
       />
 
       {/* 3. BOTTOM TAB BAR (iOS STYLE) */}
-      <nav className="bottom-nav fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-[#151f32]/95 backdrop-blur-[20px] border-t border-border flex justify-around pt-3 pb-[calc(10px+var(--safe-area-bottom))] z-50">
+      <nav className="bottom-nav fixed bottom-0 left-1/2 z-50 flex w-full max-w-[480px] -translate-x-1/2 justify-around border-t border-border bg-[#151f32]/95 pb-[calc(10px+var(--safe-area-bottom))] pt-3 backdrop-blur-[20px]">
         <button
-          className={`flex flex-col items-center gap-1 bg-transparent border-0 text-[11px] font-medium cursor-pointer flex-1 ${
-            activeTab === "home" ? "text-indigo-500" : "text-slate-400 hover:text-slate-200"
+          className={`flex flex-1 cursor-pointer flex-col items-center gap-1 border-0 bg-transparent text-[11px] font-medium ${
+            activeTab === "home"
+              ? "text-indigo-500"
+              : "text-slate-400 hover:text-slate-200"
           }`}
           onClick={() => setActiveTab("home")}
         >
-          <Home className="w-[22px] h-[22px]" />
+          <Home className="size-[22px]" />
           Tổng quan
         </button>
         <button
-          className={`flex flex-col items-center gap-1 bg-transparent border-0 text-[11px] font-medium cursor-pointer flex-1 ${
-            activeTab === "rooms" ? "text-indigo-500" : "text-slate-400 hover:text-slate-200"
+          className={`flex flex-1 cursor-pointer flex-col items-center gap-1 border-0 bg-transparent text-[11px] font-medium ${
+            activeTab === "rooms"
+              ? "text-indigo-500"
+              : "text-slate-400 hover:text-slate-200"
           }`}
           onClick={() => setActiveTab("rooms")}
         >
-          <Layers className="w-[22px] h-[22px]" />
+          <Layers className="size-[22px]" />
           Phòng trọ
         </button>
         <button
-          className={`flex flex-col items-center gap-1 bg-transparent border-0 text-[11px] font-medium cursor-pointer flex-1 ${
-            activeTab === "billing" ? "text-indigo-500" : "text-slate-400 hover:text-slate-200"
+          className={`flex flex-1 cursor-pointer flex-col items-center gap-1 border-0 bg-transparent text-[11px] font-medium ${
+            activeTab === "billing"
+              ? "text-indigo-500"
+              : "text-slate-400 hover:text-slate-200"
           }`}
           onClick={() => setActiveTab("billing")}
         >
-          <FileText className="w-[22px] h-[22px]" />
+          <FileText className="size-[22px]" />
           Ghi số điện
         </button>
         <button
-          className={`flex flex-col items-center gap-1 bg-transparent border-0 text-[11px] font-medium cursor-pointer flex-1 ${
-            activeTab === "expenses" ? "text-indigo-500" : "text-slate-400 hover:text-slate-200"
+          className={`flex flex-1 cursor-pointer flex-col items-center gap-1 border-0 bg-transparent text-[11px] font-medium ${
+            activeTab === "expenses"
+              ? "text-indigo-500"
+              : "text-slate-400 hover:text-slate-200"
           }`}
           onClick={() => setActiveTab("expenses")}
         >
-          <Wrench className="w-[22px] h-[22px]" />
+          <Wrench className="size-[22px]" />
           Chi phí
         </button>
       </nav>

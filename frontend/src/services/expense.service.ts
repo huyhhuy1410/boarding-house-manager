@@ -1,5 +1,23 @@
-import axios from "axios";
+import api from "./api";
 import { Room } from "./room.service";
+
+/**
+ * ExpenseRaw: kiểu dữ liệu thô từ API.
+ * Field amount là Decimal của Prisma → JSON serialize thành string.
+ * Field room giữ nguyên kiểu Room (không đệ quy) vì đã được xử lý ở room.service.
+ */
+interface ExpenseRaw extends Omit<Expense, "amount"> {
+  amount: string | number;
+}
+
+/**
+ * FinancialSummaryRaw: tương tự cho summary chart data.
+ */
+interface FinancialSummaryRaw extends Omit<FinancialSummary, "income" | "expense" | "profit"> {
+  income: string | number;
+  expense: string | number;
+  profit: string | number;
+}
 
 /**
  * Interface representing an Expense record on the Frontend.
@@ -24,13 +42,14 @@ export interface FinancialSummary {
   profit: number;
 }
 
+
 export const expenseService = {
   /**
    * Fetches all expenses, optionally filtered by room ID.
    */
   getAll: async (filter?: { roomId?: string }): Promise<Expense[]> => {
     try {
-      const response = await axios.get<any[]>("/api/expenses", { params: filter });
+      const response = await api.get<ExpenseRaw[]>("/api/expenses", { params: filter });
       return response.data.map((exp) => ({
         ...exp,
         amount: Number(exp.amount),
@@ -52,7 +71,7 @@ export const expenseService = {
     roomId?: string | null;
   }): Promise<Expense> => {
     try {
-      const response = await axios.post<any>("/api/expenses", data);
+      const response = await api.post<ExpenseRaw>("/api/expenses", data);
       const exp = response.data;
       return {
         ...exp,
@@ -78,7 +97,7 @@ export const expenseService = {
     }>,
   ): Promise<Expense> => {
     try {
-      const response = await axios.put<any>(`/api/expenses/${id}`, data);
+      const response = await api.put<ExpenseRaw>(`/api/expenses/${id}`, data);
       const exp = response.data;
       return {
         ...exp,
@@ -95,7 +114,7 @@ export const expenseService = {
    */
   delete: async (id: string): Promise<Expense> => {
     try {
-      const response = await axios.delete<any>(`/api/expenses/${id}`);
+      const response = await api.delete<ExpenseRaw>(`/api/expenses/${id}`);
       const exp = response.data;
       return {
         ...exp,
@@ -112,7 +131,7 @@ export const expenseService = {
    */
   getSummary: async (): Promise<FinancialSummary[]> => {
     try {
-      const response = await axios.get<any[]>("/api/expenses/summary");
+      const response = await api.get<FinancialSummaryRaw[]>("/api/expenses/summary");
       return response.data.map((item) => ({
         month: item.month,
         income: Number(item.income),
