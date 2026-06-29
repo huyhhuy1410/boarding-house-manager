@@ -482,7 +482,7 @@ Xin cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
   return (
     <div className="mx-auto flex max-w-[480px] flex-col gap-4 px-4 pt-4">
       {/* 1. APP HEADER */}
-      <header className="flex items-center justify-between border-b border-border/40 pb-2 pt-1">
+      <header className="border-border/40 flex items-center justify-between border-b pb-2 pt-1">
         <div>
           <h1 className="bg-gradient-to-r from-white to-indigo-200 bg-clip-text text-[22px] font-extrabold leading-tight text-transparent">
             Quản Lý Trọ Việt
@@ -493,7 +493,7 @@ Xin cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
         </div>
         <button
           onClick={authService.logout}
-          className="active-scale cursor-pointer rounded-lg border border-border bg-[#1e293b] px-3 py-1.5 text-[11px] font-medium text-slate-300 transition-colors hover:bg-red-950/40 hover:text-red-400"
+          className="active-scale border-border cursor-pointer rounded-lg border bg-[#1e293b] px-3 py-1.5 text-[11px] font-medium text-slate-300 transition-colors hover:bg-red-950/40 hover:text-red-400"
         >
           Đăng xuất
         </button>
@@ -619,7 +619,7 @@ Xin cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
       />
 
       {/* 3. BOTTOM TAB BAR (iOS STYLE) */}
-      <nav className="bottom-nav fixed bottom-0 left-1/2 z-50 flex w-full max-w-[480px] -translate-x-1/2 justify-around border-t border-border bg-[#151f32]/95 pb-[calc(10px+var(--safe-area-bottom))] pt-3 backdrop-blur-[20px]">
+      <nav className="bottom-nav border-border fixed bottom-0 left-1/2 z-50 flex w-full max-w-[480px] -translate-x-1/2 justify-around border-t bg-[#151f32]/95 pb-[calc(10px+var(--safe-area-bottom))] pt-3 backdrop-blur-[20px]">
         <button
           className={`flex flex-1 cursor-pointer flex-col items-center gap-1 border-0 bg-transparent text-[11px] font-medium ${
             activeTab === "home"

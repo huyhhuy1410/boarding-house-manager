@@ -51,9 +51,9 @@ export const BoardingHouseModal: React.FC<BoardingHouseModalProps> = ({
     <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/75 p-4 backdrop-blur-[3px]">
       <form
         onSubmit={handleSubmit}
-        className="flex max-h-[90vh] w-full max-w-[420px] flex-col gap-4 overflow-y-auto rounded-2xl border border-border bg-surface p-6 shadow-2xl"
+        className="border-border bg-surface flex max-h-[90vh] w-full max-w-[420px] flex-col gap-4 overflow-y-auto rounded-2xl border p-6 shadow-2xl"
       >
-        <div className="flex items-center justify-between border-b border-border pb-3.5">
+        <div className="border-border flex items-center justify-between border-b pb-3.5">
           <h3 className="text-[17px] font-bold text-slate-100">
             {editingBoardingHouse
               ? `Chỉnh sửa: ${editingBoardingHouse.name}`
@@ -84,14 +84,14 @@ export const BoardingHouseModal: React.FC<BoardingHouseModalProps> = ({
               placeholder="Ví dụ: Dãy trọ A1"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-[13px] text-slate-100
+              className="border-border bg-bg w-full rounded-lg border px-3 py-2 text-[13px] text-slate-100
   transition-colors focus:border-indigo-500 focus:outline-none"
             />
           </div>
         </div>
 
         {/* Buttons điều hướng */}
-        <div className="mt-5 flex gap-2.5 border-t border-border pt-4">
+        <div className="border-border mt-5 flex gap-2.5 border-t pt-4">
           {editingBoardingHouse && (
             <button
               type="button"
@@ -106,7 +106,7 @@ export const BoardingHouseModal: React.FC<BoardingHouseModalProps> = ({
             type="button"
             disabled={loading}
             onClick={onClose}
-            className="active-scale flex-1 rounded-xl border border-border py-2.5 text-[13px] text-slate-400 transition-colors hover:bg-slate-800/40"
+            className="active-scale border-border flex-1 rounded-xl border py-2.5 text-[13px] text-slate-400 transition-colors hover:bg-slate-800/40"
           >
             Hủy
           </button>

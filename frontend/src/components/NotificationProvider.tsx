@@ -101,7 +101,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       {/* 3. HIỂN THỊ CONFIRM DIALOG CUSTOM (Thay thế confirm()) */}
       {confirmConfig && (
         <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
-          <div className="animate-scale-in relative w-full max-w-[340px] overflow-hidden rounded-2xl border border-border bg-surface p-5 shadow-2xl">
+          <div className="animate-scale-in border-border bg-surface relative w-full max-w-[340px] overflow-hidden rounded-2xl border p-5 shadow-2xl">
             {/* Thanh gradient điểm nhấn ở đầu dialog */}
             <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-indigo-500 to-purple-500"></div>
 
@@ -116,7 +116,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             <div className="flex justify-end gap-2.5">
               <button
                 onClick={handleCancelConfirm}
-                className="active-scale cursor-pointer rounded-lg border border-border bg-bg px-4 py-2 text-[12.5px] font-medium text-slate-300 transition-colors hover:bg-[#1a2333]"
+                className="active-scale border-border bg-bg cursor-pointer rounded-lg border px-4 py-2 text-[12.5px] font-medium text-slate-300 transition-colors hover:bg-[#1a2333]"
               >
                 Hủy
               </button>

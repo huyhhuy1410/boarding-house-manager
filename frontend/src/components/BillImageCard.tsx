@@ -44,7 +44,7 @@ export const BillImageCard: React.FC<BillImageCardProps> = ({
     <>
       <button
         onClick={handleDownloadImage}
-        className="active-scale flex w-auto items-center gap-1 rounded-lg border border-border bg-[#1e2d4a]/50 px-3.5 py-1.5 text-[12px] font-bold text-indigo-400 transition-all hover:bg-surface-hover"
+        className="active-scale border-border hover:bg-surface-hover flex w-auto items-center gap-1 rounded-lg border bg-[#1e2d4a]/50 px-3.5 py-1.5 text-[12px] font-bold text-indigo-400 transition-all"
       >
         <Download size={12} /> Tải ảnh
       </button>
