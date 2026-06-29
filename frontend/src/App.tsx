@@ -80,19 +80,20 @@ export default function App() {
   const [expenseRoomId, setExpenseRoomId] = useState<string>("chung");
   const [expenseDesc, setExpenseDesc] = useState<string>("");
 
-  // Hàm load dữ liệu từ API (Hỗ trợ tham số silent để chạy ngầm không hiện loading)
+  // Hàm load dữ liệu từ API song song 100% bằng Promise.all
   const fetchRoomsAndBills = async (silent = false) => {
     try {
       if (!silent) setLoading(true);
-      const [roomsData, bhData] = await Promise.all([
+      
+      const [roomsData, bhData, billsData, expensesData, summaryData] = await Promise.all([
         roomService.getAll(),
         boardingHouseService.getAll(),
+        billService.getByPeriod(selectedMonth, selectedYear),
+        expenseService.getAll(),
+        expenseService.getSummary(),
       ]);
+
       setBoardingHouses(bhData);
-      const billsData = await billService.getByPeriod(
-        selectedMonth,
-        selectedYear,
-      );
       setBills(billsData);
 
       // Map thuộc tính isPaidThisMonth cho các phòng dựa vào hóa đơn đã được lập
@@ -104,11 +105,7 @@ export default function App() {
         };
       });
       setRooms(mappedRooms);
-
-      const expensesData = await expenseService.getAll();
       setExpenses(expensesData);
-
-      const summaryData = await expenseService.getSummary();
       setChartData(summaryData);
 
       setError(null);
@@ -207,7 +204,7 @@ export default function App() {
         extraDescription,
       });
 
-      await billService.create({
+      const createdBill = await billService.create({
         roomId,
         month: selectedMonth,
         year: selectedYear,
@@ -230,7 +227,19 @@ export default function App() {
         },
       }));
 
-      await fetchRoomsAndBills();
+      // Cập nhật State hóa đơn cục bộ thay vì tải lại toàn bộ DB
+      setBills((prev) => [...prev, createdBill]);
+
+      // Cập nhật trạng thái thanh toán phòng trọ tương ứng trong State
+      setRooms((prev) =>
+        prev.map((r) =>
+          r.id === roomId ? { ...r, isPaidThisMonth: false } : r
+        )
+      );
+
+      // Tải lại biểu đồ dòng tiền (chartData) chạy ngầm dưới background
+      expenseService.getSummary().then(setChartData).catch(console.error);
+
       showToast("Đã tạo hóa đơn thành công!");
     } catch (err) {
       const errorResponse = err as {
@@ -247,12 +256,25 @@ export default function App() {
     }
   };
 
-  // Xử lý đánh dấu hóa đơn đã thanh toán
+  // Xử lý đánh dấu hóa đơn đã thanh toán (Tối ưu hóa State cục bộ)
   const handlePayBill = async (billId: string) => {
     try {
       setLoading(true);
-      await billService.pay(billId);
-      await fetchRoomsAndBills();
+      const updatedBill = await billService.pay(billId);
+      
+      // Chỉ cập nhật hóa đơn vừa thanh toán trong mảng state
+      setBills((prev) => prev.map((b) => (b.id === billId ? updatedBill : b)));
+      
+      // Đánh dấu phòng tương ứng đã thanh toán tiền trong tháng
+      setRooms((prev) =>
+        prev.map((r) =>
+          r.id === updatedBill.roomId ? { ...r, isPaidThisMonth: true } : r
+        )
+      );
+
+      // Cập nhật lại biểu đồ dòng tiền chạy ngầm dưới background
+      expenseService.getSummary().then(setChartData).catch(console.error);
+
       showToast("Đã cập nhật thanh toán hóa đơn!");
     } catch (err) {
       const errorResponse = err as {
@@ -269,12 +291,28 @@ export default function App() {
     }
   };
 
-  // Xử lý hủy/xóa hóa đơn chưa thanh toán
+  // Xử lý hủy/xóa hóa đơn chưa thanh toán (Tối ưu hóa State cục bộ)
   const handleDeleteBill = async (billId: string) => {
     try {
       setLoading(true);
+      const targetBill = bills.find((b) => b.id === billId);
       await billService.delete(billId);
-      await fetchRoomsAndBills();
+      
+      // Xóa hóa đơn khỏi state cục bộ
+      setBills((prev) => prev.filter((b) => b.id !== billId));
+
+      // Reset trạng thái thanh toán của phòng về chưa chốt
+      if (targetBill) {
+        setRooms((prev) =>
+          prev.map((r) =>
+            r.id === targetBill.roomId ? { ...r, isPaidThisMonth: false } : r
+          )
+        );
+      }
+
+      // Cập nhật lại biểu đồ dòng tiền chạy ngầm dưới background
+      expenseService.getSummary().then(setChartData).catch(console.error);
+
       showToast("Đã hủy chốt hóa đơn!");
     } catch (err) {
       const errorResponse = err as {
