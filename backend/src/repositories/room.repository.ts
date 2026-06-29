@@ -59,7 +59,7 @@ export class RoomRepository {
     status?: "VACANT" | "OCCUPIED" | "MAINTENANCE";
     renterName?: string | null;
     renterPhone?: string | null;
-    renterDeposit?: number;
+    renterDeposit?: number | null;
     electricityPrice?: number;
     waterPrice?: number;
     internetPrice?: number;
