@@ -26,6 +26,22 @@ import { authService, User } from "./services/auth.service";
 // Notification Context
 import { useNotification } from "./components/NotificationProvider";
 
+// Helper function to extract friendly error messages from API responses (supporting Zod validation errors)
+const getErrorMessage = (err: any): string => {
+  if (err.response?.data) {
+    const data = err.response.data;
+    // 1. Zod validation errors list
+    if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
+      return data.errors.map((e: any) => e.message).join(", ");
+    }
+    // 2. Custom error messages from backend
+    if (data.error) return data.error;
+    // 3. General message
+    if (data.message) return data.message;
+  }
+  return err.message || "Đã xảy ra lỗi hệ thống!";
+};
+
 export default function App() {
   const { showToast, showConfirm } = useNotification();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
@@ -242,15 +258,7 @@ export default function App() {
 
       showToast("Đã tạo hóa đơn thành công!");
     } catch (err) {
-      const errorResponse = err as {
-        response?: { data?: { message?: string } };
-        message?: string;
-      };
-      const msg =
-        errorResponse.response?.data?.message ||
-        errorResponse.message ||
-        "Không thể tạo hóa đơn!";
-      showToast("Lỗi: " + msg, "error");
+      showToast("Lỗi: " + getErrorMessage(err), "error");
     } finally {
       setLoading(false);
     }
@@ -277,15 +285,7 @@ export default function App() {
 
       showToast("Đã cập nhật thanh toán hóa đơn!");
     } catch (err) {
-      const errorResponse = err as {
-        response?: { data?: { message?: string } };
-        message?: string;
-      };
-      const msg =
-        errorResponse.response?.data?.message ||
-        errorResponse.message ||
-        "Không thể thanh toán!";
-      showToast("Lỗi: " + msg, "error");
+      showToast("Lỗi: " + getErrorMessage(err), "error");
     } finally {
       setLoading(false);
     }
@@ -315,15 +315,7 @@ export default function App() {
 
       showToast("Đã hủy chốt hóa đơn!");
     } catch (err) {
-      const errorResponse = err as {
-        response?: { data?: { message?: string } };
-        message?: string;
-      };
-      const msg =
-        errorResponse.response?.data?.message ||
-        errorResponse.message ||
-        "Không thể hủy hóa đơn!";
-      showToast("Lỗi: " + msg, "error");
+      showToast("Lỗi: " + getErrorMessage(err), "error");
     } finally {
       setLoading(false);
     }
@@ -364,15 +356,7 @@ export default function App() {
       await fetchRoomsAndBills();
       showToast("Đã lưu chi phí phát sinh!");
     } catch (err) {
-      const errorResponse = err as {
-        response?: { data?: { error?: string } };
-        message?: string;
-      };
-      showToast(
-        "Lỗi: " +
-          (errorResponse.response?.data?.error || errorResponse.message),
-        "error",
-      );
+      showToast("Lỗi: " + getErrorMessage(err), "error");
     } finally {
       setLoading(false);
     }
@@ -387,15 +371,7 @@ export default function App() {
         await fetchRoomsAndBills();
         showToast("Đã xóa chi phí thành công!");
       } catch (err) {
-        const errorResponse = err as {
-          response?: { data?: { error?: string } };
-          message?: string;
-        };
-        showToast(
-          "Lỗi khi xóa: " +
-            (errorResponse.response?.data?.error || errorResponse.message),
-          "error",
-        );
+        showToast("Lỗi khi xóa: " + getErrorMessage(err), "error");
       } finally {
         setLoading(false);
       }
@@ -468,15 +444,7 @@ Xin cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
       setShowRoomModal(false);
       await fetchRoomsAndBills();
     } catch (err) {
-      const errorResponse = err as {
-        response?: { data?: { error?: string } };
-        message?: string;
-      };
-      showToast(
-        "Lỗi khi lưu phòng: " +
-          (errorResponse.response?.data?.error || errorResponse.message),
-        "error",
-      );
+      showToast("Lỗi khi lưu phòng: " + getErrorMessage(err), "error");
     } finally {
       setLoading(false);
     }
@@ -494,15 +462,7 @@ Xin cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
           await fetchRoomsAndBills();
           showToast("Đã xóa phòng trọ thành công!");
         } catch (err) {
-          const errorResponse = err as {
-            response?: { data?: { error?: string } };
-            message?: string;
-          };
-          showToast(
-            "Lỗi khi xóa: " +
-              (errorResponse.response?.data?.error || errorResponse.message),
-            "error",
-          );
+          showToast("Lỗi khi xóa: " + getErrorMessage(err), "error");
         } finally {
           setLoading(false);
         }
@@ -536,14 +496,7 @@ Xin cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
       setShowBHModal(false);
       await fetchRoomsAndBills();
     } catch (err) {
-      const e = err as {
-        response?: { data?: { error?: string } };
-        message?: string;
-      };
-      showToast(
-        "Lỗi khi lưu dãy trọ: " + (e.response?.data?.error || e.message),
-        "error",
-      );
+      showToast("Lỗi khi lưu dãy trọ: " + getErrorMessage(err), "error");
     } finally {
       setLoading(false);
     }
@@ -561,14 +514,7 @@ Xin cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
           await fetchRoomsAndBills();
           showToast("Đã xóa dãy trọ thành công!");
         } catch (err) {
-          const e = err as {
-            response?: { data?: { error?: string } };
-            message?: string;
-          };
-          showToast(
-            "Lỗi khi xóa: " + (e.response?.data?.error || e.message),
-            "error",
-          );
+          showToast("Lỗi khi xóa: " + getErrorMessage(err), "error");
         } finally {
           setLoading(false);
         }

@@ -33,9 +33,9 @@ export const createRoomSchema = z.object({
     rentStartWater: z.number().nonnegative("Chỉ số nước đầu vào không được âm!").optional(),
     electricityPrice: z
       .number()
-      .positive("Giá điện phải là số dương!")
+      .nonnegative("Giá điện không được là số âm!")
       .optional(),
-    waterPrice: z.number().positive("Giá nước phải là số dương!").optional(),
+    waterPrice: z.number().nonnegative("Giá nước không được là số âm!").optional(),
     internetPrice: z
       .number()
       .nonnegative("Giá internet không được là số âm!")
