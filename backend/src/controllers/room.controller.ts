@@ -56,4 +56,14 @@ export class RoomController {
     const deletedRoom = await this.roomService.deleteRoom(id);
     res.status(200).json(deletedRoom);
   });
+
+  /**
+   * HTTP POST /api/rooms/relocate
+   * Chuyển khách thuê sang phòng trọ khác
+   */
+  relocate = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const result = await this.roomService.relocateTenant(req.body);
+    res.status(200).json(result);
+  });
 }
+

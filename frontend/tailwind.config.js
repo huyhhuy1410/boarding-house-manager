@@ -7,8 +7,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        display: ['Outfit', 'sans-serif'],
-        sans: ['Plus Jakarta Sans', 'sans-serif'],
+        display: ['Be Vietnam Pro', 'sans-serif'],
+        sans: ['Inter', 'sans-serif'],
       },
       colors: {
         bg: '#0b0f19',

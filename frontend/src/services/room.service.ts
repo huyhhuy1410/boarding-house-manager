@@ -39,6 +39,13 @@ export interface Room {
   trashPrice: number;
   renterName: string | null;
   renterPhone: string | null;
+  renterCccdNumber: string | null;
+  renterCccdDate: string | null;
+  renterCccdPlace: string | null;
+  renterAddress: string | null;
+  renterDob: string | null;
+  renterMemberCount: number | null;
+  renterVehiclePlates: string | null;
   renterDeposit: number | null;
   electricityDeposit: number;
   isElectricityIncluded: boolean;
@@ -160,6 +167,54 @@ export const roomService = {
       await api.delete<void>(`/api/rooms/${id}`);
     } catch (error) {
       console.error("Error deleting room:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Gọi API chuyển phòng cho khách thuê
+   */
+  relocate: async (data: {
+    oldRoomId: string;
+    newRoomId: string;
+    lastElectricity: number;
+    lastWater: number;
+    newRoomStartElectricity: number;
+    newRoomStartWater: number;
+    rentAmount?: number;
+    internetAmount?: number;
+    trashAmount?: number;
+    extraAmount?: number;
+    extraDescription?: string;
+  }): Promise<{ oldRoom: Room; newRoom: Room; bill: any }> => {
+    try {
+      const response = await api.post<{ oldRoom: RoomRaw; newRoom: RoomRaw; bill: any }>(
+        "/api/rooms/relocate",
+        data
+      );
+      const { oldRoom, newRoom, bill } = response.data;
+      
+      const mapRoom = (room: RoomRaw): Room => ({
+        ...room,
+        price: Number(room.price),
+        electricityPrice: Number(room.electricityPrice),
+        waterPrice: Number(room.waterPrice),
+        internetPrice: Number(room.internetPrice),
+        trashPrice: Number(room.trashPrice),
+        renterDeposit: room.renterDeposit ? Number(room.renterDeposit) : null,
+        electricityDeposit: Number(room.electricityDeposit),
+        rentStartElectricity: Number(room.rentStartElectricity),
+        rentStartWater: Number(room.rentStartWater),
+        billingDay: Number(room.billingDay),
+      });
+
+      return {
+        oldRoom: mapRoom(oldRoom),
+        newRoom: mapRoom(newRoom),
+        bill,
+      };
+    } catch (error) {
+      console.error("Error relocating room:", error);
       throw error;
     }
   },

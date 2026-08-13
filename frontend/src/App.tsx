@@ -18,6 +18,7 @@ import { BillingTab } from "./components/BillingTab";
 import { ExpensesTab } from "./components/ExpensesTab";
 import { BoardingHouseModal } from "./components/BoardingHouseModal";
 import { RoomModal, parseNumberString } from "./components/RoomModal";
+import { RelocateModal } from "./components/RelocateModal";
 import { Login } from "./components/Login";
 
 // Auth
@@ -54,6 +55,7 @@ export default function App() {
     "home" | "rooms" | "billing" | "expenses"
   >("home");
   const [loading, setLoading] = useState<boolean>(true);
+  const [showOverlayLoading, setShowOverlayLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   // States dữ liệu
@@ -75,6 +77,10 @@ export default function App() {
   // Trạng thái cho CRUD Phòng trọ
   const [showRoomModal, setShowRoomModal] = useState<boolean>(false);
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
+
+  // Trạng thái cho Nghiệp vụ chuyển phòng trọ (Relocation)
+  const [showRelocateModal, setShowRelocateModal] = useState<boolean>(false);
+  const [relocatingRoom, setRelocatingRoom] = useState<Room | null>(null);
 
   // Lưu trữ dữ liệu đang nhập ghi điện nước cho từng phòng
   const [billingInputs, setBillingInputs] = useState<
@@ -99,7 +105,13 @@ export default function App() {
   // Hàm load dữ liệu từ API song song 100% bằng Promise.all
   const fetchRoomsAndBills = async (silent = false) => {
     try {
-      if (!silent) setLoading(true);
+      if (!silent) {
+        setLoading(true);
+        // Chỉ hiển thị full-screen loading khi lần đầu tải trang (chưa có phòng nào)
+        if (rooms.length === 0) {
+          setShowOverlayLoading(true);
+        }
+      }
       
       const [roomsData, bhData, billsData, expensesData, summaryData] = await Promise.all([
         roomService.getAll(),
@@ -128,7 +140,10 @@ export default function App() {
     } catch (err) {
       setError("Không thể kết nối đến máy chủ API. Vui lòng kiểm tra lại!");
     } finally {
-      if (!silent) setLoading(false);
+      if (!silent) {
+        setLoading(false);
+        setShowOverlayLoading(false);
+      }
     }
   };
 
@@ -469,6 +484,65 @@ Xin cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
       },
     );
   };
+
+  // Trình kích hoạt mở Modal Chuyển phòng
+  const handleOpenRelocate = (room: Room) => {
+    setRelocatingRoom(room);
+    setShowRelocateModal(true);
+  };
+
+  // Xử lý chuyển phòng trọ (Database Transaction)
+  const handleRelocateTenant = async (payload: {
+    oldRoomId: string;
+    newRoomId: string;
+    lastElectricity: number;
+    lastWater: number;
+    newRoomStartElectricity: number;
+    newRoomStartWater: number;
+    rentAmount?: number;
+    extraAmount?: number;
+    extraDescription?: string;
+  }) => {
+    try {
+      setLoading(true);
+      const result = await roomService.relocate(payload);
+
+      // Cập nhật mảng rooms cục bộ cực nhanh (<100ms)
+      setRooms((prev) =>
+        prev.map((r) => {
+          if (r.id === payload.oldRoomId) {
+            return result.oldRoom;
+          }
+          if (r.id === payload.newRoomId) {
+            return result.newRoom;
+          }
+          return r;
+        })
+      );
+
+      // Cập nhật mảng bills cục bộ nếu có hóa đơn mới/cập nhật
+      if (result.bill) {
+        setBills((prev) => {
+          const index = prev.findIndex((b) => b.id === result.bill.id);
+          if (index !== -1) {
+            return prev.map((b) => (b.id === result.bill.id ? result.bill : b));
+          }
+          return [...prev, result.bill];
+        });
+      }
+
+      setShowRelocateModal(false);
+      setRelocatingRoom(null);
+      showToast("Đã chuyển phòng trọ thành công!");
+
+      // Tải lại summary biểu đồ dòng tiền chạy ngầm dưới background
+      expenseService.getSummary().then(setChartData).catch(console.error);
+    } catch (err) {
+      showToast("Lỗi khi chuyển phòng: " + getErrorMessage(err), "error");
+    } finally {
+      setLoading(false);
+    }
+  };
   // Mở modal thêm mới dãy trọ
   const handleOpenAddBH = () => {
     setEditingBH(null);
@@ -557,7 +631,7 @@ Xin cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
 
       {/* MAIN CONTAINER CONTENT VIEW */}
       <main className="flex flex-col gap-4 pb-24">
-        {loading && (
+        {showOverlayLoading && (
           <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-slate-950/40 backdrop-blur-[2px]">
             <div className="flex flex-col items-center gap-3 rounded-2xl border border-slate-800/80 bg-slate-900/90 p-6 shadow-2xl">
               <div className="size-10 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent"></div>
@@ -672,6 +746,20 @@ Xin cảm ơn bạn. Bạn vui lòng thanh toán sớm tiền phòng nhé!`;
         onSave={handleSaveRoom}
         onDelete={handleDeleteRoom}
         loading={loading}
+        onRelocateClick={handleOpenRelocate}
+      />
+      {/* MODAL NGHIỆP VỤ CHUYỂN PHÒNG (POPUP MODAL) */}
+      <RelocateModal
+        show={showRelocateModal}
+        room={relocatingRoom}
+        rooms={rooms}
+        onClose={() => {
+          setShowRelocateModal(false);
+          setRelocatingRoom(null);
+        }}
+        onRelocate={handleRelocateTenant}
+        loading={loading}
+        formatCurrency={formatCurrency}
       />
 
       {/* 3. BOTTOM TAB BAR (iOS STYLE) */}

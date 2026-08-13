@@ -48,6 +48,13 @@ model Room {
   // Thông tin khách thuê hiện tại
   renterName           String?
   renterPhone          String?
+  renterCccdNumber     String?       // Số CCCD khách thuê
+  renterCccdDate       DateTime?     // Ngày cấp CCCD
+  renterCccdPlace      String?       // Nơi cấp CCCD
+  renterAddress        String?       // Địa chỉ thường trú / Quê quán
+  renterDob            DateTime?     // Ngày sinh khách thuê
+  renterMemberCount    Int?          @default(1) // Số người ở cùng phòng
+  renterVehiclePlates  String?       // Biển số xe đăng ký
   renterDeposit        Decimal?      @default(0) // Tiền đặt cọc phòng
   electricityDeposit   Decimal       @default(0)   // Tiền cọc điện gối đầu (dành cho hẻm 9 Đơ)
   isElectricityIncluded Boolean      @default(false) // Note bao điện (dành cho 3 Trời)

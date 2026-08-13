@@ -14,7 +14,7 @@ out/
 .env.test.local
 .env.production.local
 *.env
-.env.example # Thường được commit, nhưng chúng ta giữ ở đây nếu muốn bỏ qua bản local riêng lẻ
+!.env.example
 
 # IDE / Trình soạn thảo văn bản
 .vscode/
@@ -34,6 +34,8 @@ yarn-error.log*
 *.log
 logs/
 *.sys.log
+render.log
+frontend/tailwind.log
 
 # Hệ điều hành (OS Caches)
 .DS_Store
@@ -49,8 +51,10 @@ desktop.ini
 dev.db
 dev.db-journal
 
-# File rác đặc thù của Antigravity CLI / AI
+# File rác đặc thù của Antigravity CLI / AI & Scratch
 .gemini/
+.agents/
+scratch/
 screenshot*.png
 temp/
 tmp/
@@ -59,8 +63,9 @@ proposal_quan_ly_nha_tro.md
 README-local.md
 docs/
 AGENTS.md
+frontend/room_service_review.md
 
-# Playwright
+# Playwright Test Output & Cache
 /test-results/
 /playwright-report/
 /blob-report/

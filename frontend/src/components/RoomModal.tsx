@@ -22,6 +22,7 @@ interface RoomModalProps {
   onSave: (roomPayload: Omit<Room, "id" | "boardingHouse"> & { id?: string }) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   loading: boolean;
+  onRelocateClick?: (room: Room) => void;
 }
 
 export const RoomModal: React.FC<RoomModalProps> = ({
@@ -32,6 +33,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({
   onSave,
   onDelete,
   loading,
+  onRelocateClick,
 }) => {
   // Khoá cuộn trang nền khi mở modal
   useEffect(() => {
@@ -59,6 +61,13 @@ export const RoomModal: React.FC<RoomModalProps> = ({
   // Tenant states
   const [renterName, setRenterName] = useState<string>("");
   const [renterPhone, setRenterPhone] = useState<string>("");
+  const [renterCccdNumber, setRenterCccdNumber] = useState<string>("");
+  const [renterCccdDate, setRenterCccdDate] = useState<string>("");
+  const [renterCccdPlace, setRenterCccdPlace] = useState<string>("");
+  const [renterAddress, setRenterAddress] = useState<string>("");
+  const [renterDob, setRenterDob] = useState<string>("");
+  const [renterMemberCount, setRenterMemberCount] = useState<string>("1");
+  const [renterVehiclePlates, setRenterVehiclePlates] = useState<string>("");
   const [renterDeposit, setRenterDeposit] = useState<string>("0");
   const [electricityDeposit, setElectricityDeposit] = useState<string>("0");
   const [isElectricityIncluded, setIsElectricityIncluded] = useState<boolean>(false);
@@ -81,6 +90,13 @@ export const RoomModal: React.FC<RoomModalProps> = ({
       setStatus(editingRoom.status);
       setRenterName(editingRoom.renterName || "");
       setRenterPhone(editingRoom.renterPhone || "");
+      setRenterCccdNumber(editingRoom.renterCccdNumber || "");
+      setRenterCccdDate(editingRoom.renterCccdDate ? editingRoom.renterCccdDate.substring(0, 10) : "");
+      setRenterCccdPlace(editingRoom.renterCccdPlace || "");
+      setRenterAddress(editingRoom.renterAddress || "");
+      setRenterDob(editingRoom.renterDob ? editingRoom.renterDob.substring(0, 10) : "");
+      setRenterMemberCount(editingRoom.renterMemberCount?.toString() || "1");
+      setRenterVehiclePlates(editingRoom.renterVehiclePlates || "");
       setRenterDeposit(formatNumberString(editingRoom.renterDeposit?.toString() || "0"));
       setElectricityDeposit(formatNumberString(editingRoom.electricityDeposit.toString()));
       setIsElectricityIncluded(editingRoom.isElectricityIncluded);
@@ -98,6 +114,13 @@ export const RoomModal: React.FC<RoomModalProps> = ({
       setStatus("VACANT");
       setRenterName("");
       setRenterPhone("");
+      setRenterCccdNumber("");
+      setRenterCccdDate("");
+      setRenterCccdPlace("");
+      setRenterAddress("");
+      setRenterDob("");
+      setRenterMemberCount("1");
+      setRenterVehiclePlates("");
       setRenterDeposit("0");
       setElectricityDeposit("0");
       setIsElectricityIncluded(false);
@@ -136,6 +159,13 @@ export const RoomModal: React.FC<RoomModalProps> = ({
       status,
       renterName: status === "OCCUPIED" ? renterName || null : null,
       renterPhone: status === "OCCUPIED" ? renterPhone || null : null,
+      renterCccdNumber: status === "OCCUPIED" ? renterCccdNumber || null : null,
+      renterCccdDate: status === "OCCUPIED" && renterCccdDate ? new Date(renterCccdDate).toISOString() : null,
+      renterCccdPlace: status === "OCCUPIED" ? renterCccdPlace || null : null,
+      renterAddress: status === "OCCUPIED" ? renterAddress || null : null,
+      renterDob: status === "OCCUPIED" && renterDob ? new Date(renterDob).toISOString() : null,
+      renterMemberCount: status === "OCCUPIED" ? Number(renterMemberCount) : 1,
+      renterVehiclePlates: status === "OCCUPIED" ? renterVehiclePlates || null : null,
       renterDeposit: status === "OCCUPIED" ? Number(parseNumberString(renterDeposit)) : 0,
       electricityDeposit: status === "OCCUPIED" ? Number(parseNumberString(electricityDeposit)) : 0,
       isElectricityIncluded: status === "OCCUPIED" ? isElectricityIncluded : false,
@@ -299,6 +329,83 @@ export const RoomModal: React.FC<RoomModalProps> = ({
             <div className="flex flex-col gap-2.5 rounded-xl border border-dashed border-border bg-bg p-3">
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
+                  <label className="mb-1 block text-[11px] text-slate-400">Ngày sinh</label>
+                  <input
+                    type="date"
+                    value={renterDob}
+                    onChange={(e) => setRenterDob(e.target.value)}
+                    className="min-h-[38px] w-full appearance-none rounded-lg border border-border bg-surface px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-[11px] text-slate-400">Số người ở</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={renterMemberCount}
+                    onChange={(e) => setRenterMemberCount(e.target.value)}
+                    className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="mb-1 block text-[11px] text-slate-400">Số CCCD</label>
+                  <input
+                    type="text"
+                    placeholder="12 số..."
+                    value={renterCccdNumber}
+                    onChange={(e) => setRenterCccdNumber(e.target.value)}
+                    className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-[11px] text-slate-400">Nơi cấp CCCD</label>
+                  <input
+                    type="text"
+                    placeholder="Cục CSQL..."
+                    value={renterCccdPlace}
+                    onChange={(e) => setRenterCccdPlace(e.target.value)}
+                    className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-[11px] text-slate-400">Ngày cấp CCCD</label>
+                <input
+                  type="date"
+                  value={renterCccdDate}
+                  onChange={(e) => setRenterCccdDate(e.target.value)}
+                  className="min-h-[38px] w-full appearance-none rounded-lg border border-border bg-surface px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-[11px] text-slate-400">ĐC thường trú (Hộ khẩu)</label>
+                <input
+                  type="text"
+                  placeholder="Xã/Huyện/Tỉnh..."
+                  value={renterAddress}
+                  onChange={(e) => setRenterAddress(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-[11px] text-slate-400">Biển số xe (cách nhau dấu phẩy)</label>
+                <input
+                  type="text"
+                  placeholder="29A-123.45, 30B-678.90..."
+                  value={renterVehiclePlates}
+                  onChange={(e) => setRenterVehiclePlates(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-[13px] text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
                   <label className="mb-1 block text-[11px] text-slate-400">Tên khách thuê</label>
                   <input
                     type="text"
@@ -401,6 +508,19 @@ export const RoomModal: React.FC<RoomModalProps> = ({
               className="active-scale whitespace-nowrap rounded-xl border border-red-900/60 bg-red-950/40 px-3.5 py-2.5 text-[13px] font-bold text-red-400 transition-colors hover:bg-red-900/60"
             >
               {loading ? "Đang xóa..." : "Xóa"}
+            </button>
+          )}
+          {editingRoom && editingRoom.status === "OCCUPIED" && onRelocateClick && (
+            <button
+              type="button"
+              disabled={loading}
+              onClick={() => {
+                onClose();
+                onRelocateClick(editingRoom);
+              }}
+              className="active-scale whitespace-nowrap rounded-xl border border-indigo-900/60 bg-indigo-950/40 px-3.5 py-2.5 text-[13px] font-bold text-indigo-400 transition-colors hover:bg-indigo-900/60"
+            >
+              Chuyển phòng
             </button>
           )}
           <button

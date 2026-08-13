@@ -59,6 +59,13 @@ export class RoomRepository {
     status?: "VACANT" | "OCCUPIED" | "MAINTENANCE";
     renterName?: string | null;
     renterPhone?: string | null;
+    renterCccdNumber?: string | null;
+    renterCccdDate?: Date | string | null;
+    renterCccdPlace?: string | null;
+    renterAddress?: string | null;
+    renterDob?: Date | string | null;
+    renterMemberCount?: number | null;
+    renterVehiclePlates?: string | null;
     renterDeposit?: number | null;
     electricityPrice?: number;
     waterPrice?: number;
@@ -79,6 +86,13 @@ export class RoomRepository {
         status: data.status,
         renterName: data.renterName,
         renterPhone: data.renterPhone,
+        renterCccdNumber: data.renterCccdNumber,
+        renterCccdDate: data.renterCccdDate ? new Date(data.renterCccdDate) : undefined,
+        renterCccdPlace: data.renterCccdPlace,
+        renterAddress: data.renterAddress,
+        renterDob: data.renterDob ? new Date(data.renterDob) : undefined,
+        renterMemberCount: data.renterMemberCount,
+        renterVehiclePlates: data.renterVehiclePlates,
         renterDeposit: data.renterDeposit
           ? new Prisma.Decimal(data.renterDeposit)
           : undefined,

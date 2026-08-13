@@ -25,6 +25,13 @@ export const createRoomSchema = z.object({
     status: roomStatusEnum.optional(),
     renterName: z.string().nullable().optional(),
     renterPhone: z.string().nullable().optional(),
+    renterCccdNumber: z.string().nullable().optional(),
+    renterCccdDate: z.string().nullable().optional(),
+    renterCccdPlace: z.string().nullable().optional(),
+    renterAddress: z.string().nullable().optional(),
+    renterDob: z.string().nullable().optional(),
+    renterMemberCount: z.number().int().nonnegative().nullable().optional(),
+    renterVehiclePlates: z.string().nullable().optional(),
     renterDeposit: z.number().nullable().optional(),
     electricityDeposit: z.number().nonnegative("Cọc điện không được âm!").optional(),
     isElectricityIncluded: z.boolean().optional(),
@@ -56,3 +63,20 @@ export const createRoomSchema = z.object({
 export const updateRoomSchema = z.object({
   body: createRoomSchema.shape.body.partial(),
 });
+
+export const relocateRoomSchema = z.object({
+  body: z.object({
+    oldRoomId: z.string({ message: "ID phòng cũ là bắt buộc!" }),
+    newRoomId: z.string({ message: "ID phòng mới là bắt buộc!" }),
+    lastElectricity: z.number({ message: "Số điện cuối cùng của phòng cũ là bắt buộc!" }).nonnegative("Số điện không được âm!"),
+    lastWater: z.number({ message: "Số nước cuối cùng của phòng cũ là bắt buộc!" }).nonnegative("Số nước không được âm!"),
+    newRoomStartElectricity: z.number({ message: "Số điện bắt đầu của phòng mới là bắt buộc!" }).nonnegative("Số điện không được âm!"),
+    newRoomStartWater: z.number({ message: "Số nước bắt đầu của phòng mới là bắt buộc!" }).nonnegative("Số nước không được âm!"),
+    rentAmount: z.number().nonnegative().optional(),
+    internetAmount: z.number().nonnegative().optional(),
+    trashAmount: z.number().nonnegative().optional(),
+    extraAmount: z.number().optional(),
+    extraDescription: z.string().nullable().optional(),
+  }),
+});
+

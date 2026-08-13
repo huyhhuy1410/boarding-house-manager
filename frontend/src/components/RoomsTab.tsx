@@ -162,15 +162,25 @@ export const RoomsTab: React.FC<RoomsTabProps> = ({
                   {room.status === "OCCUPIED" ? (
                     <>
                       <div className="flex flex-wrap items-center gap-1 font-semibold text-slate-100">
-                        {room.renterName}
+                        <span className="truncate max-w-[80px]">{room.renterName}</span>
+                        {room.renterMemberCount && room.renterMemberCount > 1 && (
+                          <span className="rounded bg-slate-800 px-1 py-0.5 text-[8.5px] text-slate-400 font-normal">
+                            👥 {room.renterMemberCount}
+                          </span>
+                        )}
                         {isNewRenter && (
                           <span className="rounded border border-indigo-900/60 bg-indigo-950/50 px-1.5 py-0.5 text-[8.5px] font-bold text-indigo-400">
                             Mới
                           </span>
                         )}
                       </div>
-                      <div className="text-[11.5px] text-slate-400">
-                        Giá: {formatCurrency(room.price)}/tháng
+                      <div className="text-[11.5px] text-slate-400 flex items-center justify-between gap-1">
+                        <span>Giá: {formatCurrency(room.price)}</span>
+                        {!room.renterCccdNumber && (
+                          <span className="text-[8.5px] text-amber-500 font-bold bg-amber-950/40 border border-amber-900/30 rounded px-1 select-none">
+                            ⚠️ Thiếu CCCD
+                          </span>
+                        )}
                       </div>
                       <div className="text-[11px] leading-tight text-slate-400">
                         Cọc:{" "}
