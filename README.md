@@ -15,9 +15,7 @@
 
 **RentalHub** was built to solve a real-world operational pain point: replacing manual handwritten paper logs used by small boarding house owners with a streamlined digital workflow.
 
-This repository represents the **original full-stack Express.js implementation**. It provides a complete end-to-end user experience, from an iOS-style mobile-first Progressive Web App (PWA) to a TypeScript/Express REST API backed by PostgreSQL and Prisma ORM.
-
-*(Note: For the production-oriented NestJS backend architecture rewrite, see [`boarding-house-manager-nestjs-rmk`](../boarding-house-manager-nestjs-rmk/)).*
+This repository represents the **full-stack application**. It provides a complete end-to-end user experience, from an iOS-style mobile-first Progressive Web App (PWA) to a TypeScript/Express REST API backed by PostgreSQL and Prisma ORM.
 
 ---
 
