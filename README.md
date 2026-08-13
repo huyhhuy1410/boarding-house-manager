@@ -77,6 +77,41 @@ npm run dev
 
 ---
 
+## 💡 Usage & Workflow Walkthrough
+
+Once both backend and frontend dev servers are running (`http://localhost:3005`):
+
+### 1. Landlord Operations (Web UI Workflow)
+* **Authentication**: Open `http://localhost:3005` and log in with landlord credentials.
+* **Property Setup**: Create boarding house blocks, add individual rooms, and assign tenant details (contact, deposit amount).
+* **Meter Entry**: Select a room and enter current month's electricity ($kWh$) and water ($m^3$) readings.
+* **Invoice Generation**: Click **Calculate & Issue Bill**. The system calculates utility consumption, locks price snapshots, and marks the invoice as `ISSUED`.
+* **Share Receipt**: Click **Copy Receipt** to copy formatted text summaries formatted for instant sharing via Zalo, Telegram, or SMS.
+
+### 2. API & Telegram Bot Integration
+
+#### Query Room Invoice Status via REST API
+```bash
+curl -X GET http://localhost:5005/api/rooms/ROOM_101/current-bill \
+     -H "Authorization: Bearer <YOUR_JWT_TOKEN>"
+```
+
+#### Simulate Telegram Bot `/bill` Inquiry
+```bash
+curl -X POST http://localhost:5005/api/telegram/webhook \
+     -H "Content-Type: application/json" \
+     -d '{
+       "update_id": 10001,
+       "message": {
+         "chat": { "id": 123456789 },
+         "text": "/bill HouseA/Room101"
+       }
+     }'
+```
+*Returns itemized tenant bill receipt text formatted for messaging apps.*
+
+---
+
 ## 📂 Project Directory Architecture
 
 ```text
