@@ -11,7 +11,7 @@
 
 ---
 
-## 📌 Domain Origin & Evolution
+## 📌 Motivation & Real-World Origin
 
 **RentalHub** was built to solve a real-world operational pain point: replacing manual handwritten paper logs used by small boarding house owners with a streamlined digital workflow.
 
