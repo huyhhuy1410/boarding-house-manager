@@ -110,6 +110,12 @@ cd frontend && npm run build
 
 ---
 
+## 🤝 Contributing
+
+Contributions, bug reports, and feature proposals are welcome! Feel free to open an issue or submit a Pull Request.
+
+---
+
 ## 📄 License & Provenance Notice
 
 This project is an **independent full-stack software application** created by Vo Quang Huy. It contains no proprietary code, private company secrets, or unauthorized third-party credentials.
